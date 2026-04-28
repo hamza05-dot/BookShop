@@ -39,10 +39,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // 6. Insérer dans la table client
         $stmt2 = $pdo->prepare("
-            INSERT INTO client (idUser, telephone, adresse, ville)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO client (idUser, telephone, adresse, ville,dateNaiss)
+            VALUES (?, ?, ?, ?,?)
         ");
-        $stmt2->execute([$idUser, $telephone, $adresse, $ville]);
+        $stmt2->execute([$idUser, $telephone, $adresse, $ville, $dateNaiss]);
 
         $success = "Compte créé avec succès ! Vous pouvez vous connecter.";
     }
