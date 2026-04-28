@@ -2,73 +2,89 @@
 session_start();
 require_once 'includes/db.php';
 
-$error = '';
+ $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
-    // 1. Récupérer ce que l'utilisateur a tapé
     $email    = trim($_POST['email']);
     $password = trim($_POST['password']);
 
-    // 2. Chercher l'utilisateur dans la table utilisateur
     $stmt = $pdo->prepare("SELECT * FROM utilisateur WHERE email = ?");
     $stmt->execute([$email]);
     $user = $stmt->fetch();
 
-    // 3. Vérifier si le mot de passe est correct
     if ($user && password_verify($password, $user['password'])) {
+        $_SESSION['idUser']  = $user['idUser'];
+        $_SESSION['nomUser'] = $user['nomUser'];
+        $_SESSION['email']   = $user['email'];
 
-        // 4. Créer la session
-        $_SESSION['idUser']   = $user['idUser'];
-        $_SESSION['nomUser']  = $user['nomUser'];
-        $_SESSION['email']    = $user['email'];
-
-        // 5. Vérifier si c'est un admin
         $stmt2 = $pdo->prepare("SELECT * FROM admin WHERE idUser = ?");
         $stmt2->execute([$user['idUser']]);
         $isAdmin = $stmt2->fetch();
 
         if ($isAdmin) {
             $_SESSION['role'] = 'admin';
-            header('Location: admin/dashboard.php'); // → aller au panel admin
+            header('Location: admin/dashboard.php');
         } else {
             $_SESSION['role'] = 'client';
-            header('Location: index.php'); // → aller à l'accueil
+            header('Location: index.php');
         }
         exit();
-
     } else {
         $error = "Email ou mot de passe incorrect.";
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Connexion — BookShop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/auth.css">
 </head>
 <body>
 
-    <h2>Connexion</h2>
+    <div class="auth-page">
+        <div class="auth-card">
 
-    <!-- Afficher l'erreur si elle existe -->
-    <?php if ($error): ?>
-        <p style="color:red;"><?= $error ?></p>
-    <?php endif; ?>
+            <div class="auth-header">
+                <div class="auth-logo">
+                    <span class="auth-logo-icon">📚</span> BookShop
+                </div>
+                <h1 class="auth-title">Connexion</h1>
+                <p class="auth-subtitle">Bon retour parmi nos lecteurs</p>
+            </div>
 
-    <form method="POST">
-        <label>Email :</label><br>
-        <input type="email" name="email" required><br><br>
+            <div class="auth-body">
 
-        <label>Mot de passe :</label><br>
-        <input type="password" name="password" required><br><br>
+                <?php if ($error): ?>
+                    <div class="auth-message auth-message--error">⚠ <?= $error ?></div>
+                <?php endif; ?>
 
-        <button type="submit">Se connecter</button>
-    </form>
+                <form class="auth-form" method="POST">
 
-    <p>Pas encore de compte ? <a href="register.php">S'inscrire</a></p>
+                    <div class="auth-field">
+                        <label class="auth-label" for="email">Email</label>
+                        <input class="auth-input" type="email" id="email" name="email" placeholder="jean@exemple.com" required>
+                    </div>
+
+                    <div class="auth-field">
+                        <label class="auth-label" for="password">Mot de passe</label>
+                        <input class="auth-input" type="password" id="password" name="password" placeholder="Votre mot de passe" required>
+                    </div>
+
+                    <button class="auth-submit" type="submit">Se connecter</button>
+
+                </form>
+            </div>
+
+            <div class="auth-footer">
+                Pas encore de compte ? <a href="register.php">S'inscrire</a>
+            </div>
+
+        </div>
+    </div>
 
 </body>
 </html>
