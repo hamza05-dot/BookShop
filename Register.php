@@ -2,41 +2,61 @@
 session_start();
 require_once 'includes/db.php';
 
- $error = '';
- $success = '';
+$error = '';
+$success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nomUser    = trim($_POST['nomUser']);
     $prenomUser = trim($_POST['prenomUser']);
     $email      = trim($_POST['email']);
     $password   = trim($_POST['password']);
+    $confirm    = trim($_POST['confirm']);
     $telephone  = trim($_POST['telephone']);
     $adresse    = trim($_POST['adresse']);
     $ville      = trim($_POST['ville']);
     $dateNaiss  = $_POST['dateNaiss'];
 
-    $stmt = $pdo->prepare("SELECT * FROM utilisateur WHERE email = ?");
-    $stmt->execute([$email]);
-    if ($stmt->fetch()) {
-        $error = "Cet email est déjà utilisé.";
+    // ✅ CONDITION 1 : Champs obligatoires vides
+    if (empty($nomUser) || empty($prenomUser) || empty($email) || empty($password)) {
+        $error = "Veuillez remplir tous les champs obligatoires.";
+
+    // ✅ CONDITION 2 : Format email valide
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $error = "Format email invalide.";
+
+    // ✅ CONDITION 3 : Mot de passe minimum 8 caractères
+    } elseif (strlen($password) < 8) {
+        $error = "Le mot de passe doit contenir au moins 8 caractères.";
+
+    // ✅ CONDITION 4 : Confirmation mot de passe
+    } elseif ($password !== $confirm) {
+        $error = "Les mots de passe ne correspondent pas.";
+
+    // ✅ CONDITION 5 : Email déjà utilisé
     } else {
-        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+        $stmt = $pdo->prepare("SELECT * FROM utilisateur WHERE email = ?");
+        $stmt->execute([$email]);
+        if ($stmt->fetch()) {
+            $error = "Cet email est déjà utilisé.";
+        } else {
+            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-        $stmt = $pdo->prepare("
-            INSERT INTO utilisateur (nomUser, prenomUser, email, password, createdAt)
-            VALUES (?, ?, ?, ?, NOW())
-        ");
-        $stmt->execute([$nomUser, $prenomUser, $email, $hashedPassword]);
+            $stmt = $pdo->prepare("
+                INSERT INTO utilisateur (nomUser, prenomUser, email, password, createdAt)
+                VALUES (?, ?, ?, ?, NOW())
+            ");
+            $stmt->execute([$nomUser, $prenomUser, $email, $hashedPassword]);
 
-        $idUser = $pdo->lastInsertId();
+            $idUser = $pdo->lastInsertId();
 
-        $stmt2 = $pdo->prepare("
-            INSERT INTO client (idUser, telephone, adresse, ville, dateNaiss)
-            VALUES (?, ?, ?, ?, ?)
-        ");
-        $stmt2->execute([$idUser, $telephone, $adresse, $ville, $dateNaiss]);
+            $stmt2 = $pdo->prepare("
+                INSERT INTO client (idUser, telephone, adresse, ville, dateNaiss)
+                VALUES (?, ?, ?, ?, ?)
+            ");
+            $stmt2->execute([$idUser, $telephone, $adresse, $ville, $dateNaiss]);
 
-        $success = "Compte créé avec succès ! Vous pouvez vous connecter.";
+            $success = "Compte créé avec succès ! Vous pouvez vous connecter.";
+        }
     }
 }
 ?>
@@ -91,7 +111,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     <div class="auth-field">
                         <label class="auth-label" for="password">Mot de passe</label>
-                        <input class="auth-input" type="password" id="password" name="password" placeholder="Minimum 6 caractères" required>
+                        <input class="auth-input" type="password" id="password" name="password" placeholder="Minimum 8 caractères" required>
+                    </div>
+
+                    <div class="auth-field">
+                        <label class="auth-label" for="confirm">Confirmer le mot de passe</label>
+                        <input class="auth-input" type="password" id="confirm" name="confirm" placeholder="Répétez le mot de passe" required>
                     </div>
 
                     <div class="auth-divider"><span>Informations complémentaires</span></div>
