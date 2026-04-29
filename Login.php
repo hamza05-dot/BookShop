@@ -2,35 +2,47 @@
 session_start();
 require_once 'includes/db.php';
 
- $error = '';
+$error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email    = trim($_POST['email']);
     $password = trim($_POST['password']);
 
-    $stmt = $pdo->prepare("SELECT * FROM utilisateur WHERE email = ?");
-    $stmt->execute([$email]);
-    $user = $stmt->fetch();
+    // ✅ CONDITION 1 : Champs vides
+    if (empty($email) || empty($password)) {
+        $error = "Veuillez remplir tous les champs.";
 
-    if ($user && password_verify($password, $user['password'])) {
-        $_SESSION['idUser']  = $user['idUser'];
-        $_SESSION['nomUser'] = $user['nomUser'];
-        $_SESSION['email']   = $user['email'];
+    // ✅ CONDITION 2 : Format email valide
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $error = "Format email invalide.";
 
-        $stmt2 = $pdo->prepare("SELECT * FROM admin WHERE idUser = ?");
-        $stmt2->execute([$user['idUser']]);
-        $isAdmin = $stmt2->fetch();
-
-        if ($isAdmin) {
-            $_SESSION['role'] = 'admin';
-            header('Location: admin/dashboard.php');
-        } else {
-            $_SESSION['role'] = 'client';
-            header('Location: index.php');
-        }
-        exit();
     } else {
-        $error = "Email ou mot de passe incorrect.";
+        $stmt = $pdo->prepare("SELECT * FROM utilisateur WHERE email = ?");
+        $stmt->execute([$email]);
+        $user = $stmt->fetch();
+
+        // ✅ CONDITION 3 : Email ou mot de passe incorrect
+        if ($user && password_verify($password, $user['password'])) {
+            $_SESSION['idUser']  = $user['idUser'];
+            $_SESSION['nomUser'] = $user['nomUser'];
+            $_SESSION['email']   = $user['email'];
+
+            $stmt2 = $pdo->prepare("SELECT * FROM admin WHERE idUser = ?");
+            $stmt2->execute([$user['idUser']]);
+            $isAdmin = $stmt2->fetch();
+
+            if ($isAdmin) {
+                $_SESSION['role'] = 'admin';
+                header('Location: admin/dashboard.php');
+            } else {
+                $_SESSION['role'] = 'client';
+                header('Location: index.php');
+            }
+            exit();
+
+        } else {
+            $error = "Email ou mot de passe incorrect.";
+        }
     }
 }
 ?>
