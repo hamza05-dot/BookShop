@@ -1,144 +1,113 @@
 <?php
 session_start();
 require_once '../includes/db.php';
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') { header('Location: ../login.php'); exit(); }
 
-if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
-    header('Location: ../login.php');
-    exit();
-}
-
+$activePage = 'books';
 $message = '';
 
 if (isset($_GET['delete'])) {
-    $pdo->prepare("DELETE FROM livre WHERE idLivre = ?")->execute([$_GET['delete']]);
-    $message = "Livre supprimé.";
+    $id = (int)$_GET['delete'];
+    $pdo->prepare("DELETE FROM livre_auteur    WHERE idLivre = ?")->execute([$id]);
+    $pdo->prepare("DELETE FROM livre_categorie WHERE idLivre = ?")->execute([$id]);
+    $pdo->prepare("DELETE FROM ligne_commande  WHERE idLivre = ?")->execute([$id]);
+    $pdo->prepare("DELETE FROM livre           WHERE idLivre = ?")->execute([$id]);
+    $message = "Book deleted.";
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $titre       = trim($_POST['titre']);
-    $description = trim($_POST['description']);
-    $prix        = $_POST['prix'];
-    $stock       = $_POST['stock'];
-    $image = '';
-    if ($_FILES['image']['name'] != '') {
-        $nomFichier = time() . '_' . $_FILES['image']['name'];
-        move_uploaded_file($_FILES['image']['tmp_name'], '../uploads/book-covers/' . $nomFichier);
-        $image = $nomFichier;
-    }
-    $pdo->prepare("INSERT INTO livre (titre, description, prix, stock, image, createdAt) VALUES (?, ?, ?, ?, ?, NOW())")
-        ->execute([$titre, $description, $prix, $stock, $image]);
-    $message = "Livre ajouté.";
-}
-
-$livres = $pdo->query("SELECT * FROM livre ORDER BY createdAt DESC")->fetchAll();
+$livres = $pdo->query("
+    SELECT l.*,
+           GROUP_CONCAT(DISTINCT c.nomCat SEPARATOR ', ') AS categories,
+           CONCAT(a.prenom, ' ', a.nom) AS auteur
+    FROM livre l
+    LEFT JOIN livre_categorie lc ON l.idLivre  = lc.idLivre
+    LEFT JOIN categorie c        ON lc.idCat   = c.idCat
+    LEFT JOIN livre_auteur la    ON l.idLivre  = la.idLivre
+    LEFT JOIN auteur a           ON la.idAuteur = a.idAuteur
+    GROUP BY l.idLivre
+    ORDER BY l.createdAt DESC
+")->fetchAll();
 ?>
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Livres — BookShop Admin</title>
+    <title>All Books — BookShop Admin</title>
     <link rel="stylesheet" href="../assets/css/admin.css">
+    <style>
+        .search-wrap { display:flex; align-items:center; background:#f5f7fa; border:1.5px solid #e0e4ed; border-radius:25px; padding:6px 14px; gap:8px; }
+        .search-wrap:focus-within { border-color:var(--secondary); background:#fff; }
+        #bookSearch { border:none; background:transparent; outline:none; font-size:13px; font-family:"Poppins",sans-serif; width:220px; }
+        .mini-badge { background:#eef2ff; color:#5c6bc0; font-size:11px; padding:2px 8px; border-radius:10px; white-space:nowrap; }
+        .cat-list { display:flex; flex-wrap:wrap; gap:4px; }
+        .clickable-title { color:var(--secondary); cursor:pointer; font-weight:600; text-decoration:underline; }
+        .clickable-title:hover { color:var(--primary); }
+    </style>
 </head>
 <body>
-
-<header>
-    <div class="logosec">
-        <img class="menuicn" id="menuicn" src="https://img.icons8.com/ios-filled/50/menu--v1.png" alt="menu">
-        <div class="logo">📚 BookShop Admin</div>
-    </div>
-    <span class="admin-info">Bonjour, <?= $_SESSION['nomUser'] ?> 👋</span>
-    <a class="logout-btn" href="../logout.php">Se déconnecter</a>
-</header>
-
-<div class="main-container">
-    <div class="navcontainer" id="navcontainer">
-        <nav class="nav">
-            <div class="nav-upper-options">
-                <a class="nav-option" href="dashboard.php">
-                    <img class="nav-img" src="https://img.icons8.com/?size=100&id=10245&format=png&color=000000"><h3>Dashboard</h3>
-                </a>
-                <a class="nav-option active" href="books.php">
-                    <img class="nav-img" src="https://img.icons8.com/ios-filled/50/ffffff/book.png"><h3>Livres</h3>
-                </a>
-                <a class="nav-option" href="categories.php">
-                    <img class="nav-img" src="https://img.icons8.com/ios-filled/50/price-tag.png"><h3>Catégories</h3>
-                </a>
-                <a class="nav-option" href="orders.php">
-                    <img class="nav-img" src="https://img.icons8.com/ios-filled/50/package.png"><h3>Commandes</h3>
-                </a>
-                <a class="nav-option" href="users.php">
-                    <img class="nav-img" src="https://img.icons8.com/ios-filled/50/user.png"><h3>Utilisateurs</h3>
-                </a>
-                <a class="nav-option logout-nav" href="../logout.php">
-                    <img class="nav-img" src="https://img.icons8.com/ios-filled/50/exit.png"><h3>Déconnexion</h3>
-                </a>
+<?php include '../includes/nav.php'; ?>
+<div class="main">
+    <?php if ($message): ?><div class="message-box success">✓ <?= $message ?></div><?php endif; ?>
+    <div class="report-container">
+        <div class="report-header">
+            <h2>📚 All Books (<span id="bookCount"><?= count($livres) ?></span>)</h2>
+            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                <div class="search-wrap">
+                    <span>🔍</span>
+                    <input type="text" id="bookSearch" placeholder="Search title, author…" oninput="filterBooks(this.value)">
+                </div>
+                <a class="btn btn-primary" href="add-book.php">＋ Add Book</a>
             </div>
-        </nav>
-    </div>
-
-    <div class="main">
-        <?php if ($message): ?>
-            <div class="message-box success">✓ <?= $message ?></div>
-        <?php endif; ?>
-
-        <div class="form-box">
-            <h3>Ajouter un livre</h3>
-            <form method="POST" enctype="multipart/form-data">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Titre</label>
-                        <input type="text" name="titre" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Prix (DT)</label>
-                        <input type="number" name="prix" step="0.01" required>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Stock</label>
-                        <input type="number" name="stock" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Image</label>
-                        <input type="file" name="image" accept="image/*">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Description</label>
-                    <textarea name="description"></textarea>
-                </div>
-                <button class="btn btn-primary" type="submit">Ajouter</button>
-            </form>
         </div>
-
-        <div class="report-container">
-            <div class="report-header">
-                <h2>Liste des livres</h2>
-            </div>
-            <table>
-                <tr>
-                    <th>Image</th><th>Titre</th><th>Prix</th><th>Stock</th><th>Action</th>
-                </tr>
-                <?php foreach ($livres as $livre): ?>
-                <tr>
-                    <td><?= $livre['image'] ? '<img class="book-img" src="../uploads/book-covers/'.$livre['image'].'">' : '—' ?></td>
-                    <td><?= $livre['titre'] ?></td>
-                    <td><?= number_format($livre['prix'], 2) ?> DT</td>
-                    <td><?= $livre['stock'] ?></td>
-                    <td><a class="btn btn-danger" href="?delete=<?= $livre['idLivre'] ?>" onclick="return confirm('Supprimer ?')">Supprimer</a></td>
-                </tr>
-                <?php endforeach; ?>
-            </table>
-        </div>
+        <table id="bookTable">
+            <thead><tr><th>Cover</th><th>Title</th><th>Author</th><th>Categories</th><th>Price</th><th>Stock</th><th>Actions</th></tr></thead>
+            <tbody>
+            <?php foreach ($livres as $livre): ?>
+            <tr class="book-row" data-search="<?= strtolower(htmlspecialchars($livre['titre'].' '.($livre['auteur']??'').' '.($livre['categories']??''))) ?>">
+                <td>
+                    <?php if ($livre['image']): ?>
+                        <img class="book-img" src="../uploads/book-covers/<?= htmlspecialchars($livre['image']) ?>">
+                    <?php else: ?>
+                        <div style="width:45px;height:60px;background:#eef;border-radius:4px;display:flex;align-items:center;justify-content:center;">📖</div>
+                    <?php endif; ?>
+                </td>
+                <td><a class="clickable-title" href="book-detail.php?id=<?= $livre['idLivre'] ?>"><?= htmlspecialchars($livre['titre']) ?></a></td>
+                <td style="font-size:13px; color:#777;"><?= htmlspecialchars($livre['auteur'] ?? '—') ?></td>
+                <td>
+                    <div class="cat-list">
+                        <?php foreach (explode(', ', $livre['categories'] ?? '') as $cat): ?>
+                            <?php if (trim($cat)): ?><span class="mini-badge"><?= htmlspecialchars(trim($cat)) ?></span><?php endif; ?>
+                        <?php endforeach; ?>
+                    </div>
+                </td>
+                <td><strong><?= number_format($livre['prix'], 2) ?> DT</strong></td>
+                <td><span class="badge <?= $livre['stock'] > 0 ? 'confirmee' : 'annulee' ?>"><?= $livre['stock'] ?></span></td>
+                <td>
+                    <a class="btn btn-warning" href="book-detail.php?id=<?= $livre['idLivre'] ?>">Edit</a>
+                    <a class="btn btn-danger" href="?delete=<?= $livre['idLivre'] ?>" onclick="return confirm('Delete this book?')">Delete</a>
+                </td>
+            </tr>
+            <?php endforeach; ?>
+            <?php if (empty($livres)): ?>
+                <tr><td colspan="7" style="text-align:center;padding:40px;color:#bbb;">No books yet. <a href="add-book.php">Add your first →</a></td></tr>
+            <?php endif; ?>
+            </tbody>
+        </table>
     </div>
 </div>
-
+</div>
 <script>
-    document.querySelector(".menuicn").addEventListener("click", () => {
-        document.querySelector(".navcontainer").classList.toggle("navclose");
+function filterBooks(q) {
+    q = q.toLowerCase();
+    let visible = 0;
+    document.querySelectorAll('.book-row').forEach(row => {
+        const match = !q || row.dataset.search.includes(q);
+        row.style.display = match ? '' : 'none';
+        if (match) visible++;
     });
+    document.getElementById('bookCount').textContent = visible;
+}
+document.querySelector(".menuicn").addEventListener("click", () => { document.querySelector(".navcontainer").classList.toggle("navclose"); });
 </script>
-</body>
-</html>
+</body></html>
