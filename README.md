@@ -56,7 +56,7 @@ bookshop/
 │   ├── books.php           # Gestion livres
 │   ├── categories.php      # Gestion catégories
 │   ├── orders.php          # Gestion commandes
-│   └── users.php           # Gestion utilisateurs
+│   └── users.php          # Gestion utilisateurs
 │
 ├── includes/
 │   ├── db.php              # Connexion PDO
@@ -130,8 +130,8 @@ git push origin feature/hamza-auth-admin
 
 | Membre | Rôle | Branche |
 |---|---|---|
-| **Hamza Arfaoui** | Auth (login/logout) + Panel Admin | `feature/hamza-auth-admin` |
-| **Eya Kochbati** | Côté Utilisateur + Base de données | `feature/eya-user` |
+| **Hamza Arfaoui** | Panel Admin | `feature/hamza-auth-admin` |
+| **Eya Kochbati** | Côté Utilisateur| `feature/eya-user` |
 
 ---
 
@@ -139,7 +139,7 @@ git push origin feature/hamza-auth-admin
 
 Projet académique — TIC-1 · 2025
 | Branche | Responsable | Contenu |
-- Accéder via : `http://localhost/bookshop`
+- Accéder via : `http://localhost/BookShop`
 ```
 ```php
 
