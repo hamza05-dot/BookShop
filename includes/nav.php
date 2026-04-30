@@ -30,6 +30,9 @@
                 <a class="nav-option" href="categories.php">
                     <img class="nav-img" src="https://img.icons8.com/?size=100&id=8416&format=png&color=000000"><h3>Categories</h3>
                 </a>
+                <a class="nav-option" href="review.php">
+                    <img class="nav-img" src="https://img.icons8.com/ios-filled/50/star.png"><h3>Reviews</h3>
+                </a>
                 <a class="nav-option" href="orders.php">
                     <img class="nav-img" src="https://img.icons8.com/?size=100&id=11271&format=png&color=000000"><h3>Orders</h3>
                 </a>
