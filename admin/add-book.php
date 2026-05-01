@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['addBook'])) {
         if (!empty($_FILES['a_image']['name'])) {
             $ext     = pathinfo($_FILES['a_image']['name'], PATHINFO_EXTENSION);
             $nomFich = time() . '_author_' . uniqid() . '.' . $ext;
-            if (move_uploaded_file($_FILES['a_image']['tmp_name'], '../uploads/author/' . $nomFich)) {
+            if (move_uploaded_file($_FILES['a_image']['tmp_name'], '../uploads/authors/' . $nomFich)) {
                 $aImage = $nomFich;
             }
         }
@@ -255,7 +255,7 @@ $auteurs    = $pdo->query("SELECT * FROM auteur ORDER BY nom ASC")->fetchAll();
                                 <?php foreach ($auteurs as $a): ?>
                                     <option value="<?= $a['idAuteur'] ?>">
                                         <?= htmlspecialchars($a['prenom'] . ' ' . $a['nom']) ?>
-                                        <?= $a['status'] === 'decede' ? ' — ⚫ Deceased' : ' — 🟢 Alive' ?>
+                                        <?= $a['status'] === 'Dead' ? ' — ⚫ Deceased' : ' — 🟢 Alive' ?>
                                     </option>
                                 <?php endforeach; ?>
                             </select>
