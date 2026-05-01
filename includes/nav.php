@@ -18,9 +18,6 @@
                 <a class="nav-option" href="dashboard.php">
                     <img class="nav-img" src="https://img.icons8.com/?size=100&id=10245&format=png&color=000000"><h3>Dashboard</h3>
                 </a>
-                <a class="nav-option" href="add-book.php">
-                    <img class="nav-img" src="https://img.icons8.com/?size=100&id=11255&format=png&color=000000"><h3>Add Book</h3>
-                </a>
                 <a class="nav-option" href="books.php">
                     <img class="nav-img" src="https://img.icons8.com/ios-filled/50/book.png"><h3>All Books</h3>
                 </a>
