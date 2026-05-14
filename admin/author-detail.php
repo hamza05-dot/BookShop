@@ -48,7 +48,7 @@ $books = $pdo->query("
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($author['prenom'].' '.$author['nom']) ?> — Author</title>
-    <link rel="stylesheet" href="../assets/css/admin.css">
+    <link rel="stylesheet" href="../assests/css/admin.css">
     <style>
         .author-profile { display:flex; gap:25px; align-items:flex-start; margin-bottom:25px; padding-bottom:20px; border-bottom:1px solid #eee; }
         .author-photo { width:110px; height:110px; border-radius:50%; object-fit:cover; border:3px solid #eee; box-shadow:0 4px 15px rgba(0,0,0,0.1); }

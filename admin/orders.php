@@ -28,7 +28,7 @@ $commandes = $pdo->query("
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Commandes — BookShop Admin</title>
-    <link rel="stylesheet" href="../assets/css/admin.css">
+    <link rel="stylesheet" href="../assests/css/admin.css">
 </head>
 <body>
 <?php include '../includes/nav.php'; ?>

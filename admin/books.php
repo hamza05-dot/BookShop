@@ -34,7 +34,7 @@ $livres = $pdo->query("
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>All Books — BookShop Admin</title>
-    <link rel="stylesheet" href="../assets/css/admin.css">
+    <link rel="stylesheet" href="../assests/css/admin.css">
     <style>
         .search-wrap { display:flex; align-items:center; background:#f5f7fa; border:1.5px solid #e0e4ed; border-radius:25px; padding:6px 14px; gap:8px; }
         .search-wrap:focus-within { border-color:var(--secondary); background:#fff; }

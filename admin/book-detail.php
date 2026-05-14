@@ -53,7 +53,7 @@ $selectedCats  = $livre['cat_ids'] ? explode(',', $livre['cat_ids']) : [];
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($livre['titre']) ?> — Edit</title>
-    <link rel="stylesheet" href="../assets/css/admin.css">
+    <link rel="stylesheet" href="../assests/css/admin.css">
     <style>
         .book-preview { display:flex; gap:30px; align-items:flex-start; margin-bottom:25px; padding-bottom:20px; border-bottom:1px solid #eee; }
         .book-cover-lg { width:120px; height:160px; object-fit:cover; border-radius:8px; box-shadow:0 4px 15px rgba(0,0,0,0.15); }

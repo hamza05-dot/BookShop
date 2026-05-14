@@ -39,7 +39,7 @@ $fiveStars = count(array_filter($reviews, fn($r) => $r['note'] == 5));
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reviews — BookShop Admin</title>
-    <link rel="stylesheet" href="../assets/css/admin.css">
+    <link rel="stylesheet" href="../assests/css/admin.css">
     <style>
         .stars { color: #C9A84C; font-size: 15px; letter-spacing: 1px; }
         .stars-gray { color: #ddd; }

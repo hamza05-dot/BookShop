@@ -35,7 +35,7 @@ $categories = $pdo->query("
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Categories — BookShop Admin</title>
-    <link rel="stylesheet" href="../assets/css/admin.css">
+    <link rel="stylesheet" href="../assests/css/admin.css">
     <style>.clickable-cat { color:var(--secondary); cursor:pointer; font-weight:600; text-decoration:underline; }</style>
 </head>
 <body>

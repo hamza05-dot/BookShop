@@ -73,7 +73,7 @@ $auteurs    = $pdo->query("SELECT * FROM auteur ORDER BY nom ASC")->fetchAll();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Book — BookShop Admin</title>
-    <link rel="stylesheet" href="../assets/css/admin.css">
+    <link rel="stylesheet" href="../assests/css/admin.css">
     <style>
         .tabs { display:flex; gap:0; margin-bottom:0; border-bottom:2px solid #e0e0e0; }
         .tab-btn {

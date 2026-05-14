@@ -55,7 +55,7 @@ $clients = $pdo->query("
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Users — BookShop Admin</title>
-    <link rel="stylesheet" href="../assets/css/admin.css">
+    <link rel="stylesheet" href="../assests/css/admin.css">
     <style>
         .section-title { font-size:18px; font-weight:600; color:var(--primary); margin:30px 0 15px; }
         .search-wrap { display:flex; align-items:center; background:#f5f7fa; border:1.5px solid #e0e4ed; border-radius:25px; padding:6px 14px; gap:8px; }
@@ -97,7 +97,7 @@ $clients = $pdo->query("
             <tbody>
             <?php foreach ($admins as $a): ?>
             <tr>
-                <td><?= $a['image'] ? '<img class="user-avatar" src="../uploads/'.$a['image'].'">' : '<span class="avatar-placeholder">👤</span>' ?></td>
+                <td><?= $a['image'] ? '<img class="user-avatar" src="../uploads/client'.$a['image'].'">' : '<span class="avatar-placeholder">👤</span>' ?></td>
                 <td><strong><?= htmlspecialchars($a['nomUser'].' '.$a['prenomUser']) ?></strong></td>
                 <td><?= htmlspecialchars($a['email']) ?></td>
                 <td>

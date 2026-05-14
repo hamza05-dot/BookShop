@@ -27,7 +27,7 @@ $authors = $pdo->query("
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Authors — BookShop Admin</title>
-    <link rel="stylesheet" href="../assets/css/admin.css">
+    <link rel="stylesheet" href="../assests/css/admin.css">
     <style>
         .author-avatar { width:42px; height:42px; border-radius:50%; object-fit:cover; }
         .avatar-ph { width:42px; height:42px; border-radius:50%; background:#dde; display:inline-flex; align-items:center; justify-content:center; font-size:20px; }
