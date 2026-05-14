@@ -1,7 +1,11 @@
 <?php
 session_start();
-require_once 'config/db.php'; 
+require_once 'includes/db.php';
 
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'client') {
+    header('Location: Login.php');
+    exit();
+}
 // Récupération des livres
 $query = $pdo->query("SELECT * FROM livre");
 $books = $query->fetchAll(PDO::FETCH_ASSOC);
@@ -58,7 +62,7 @@ $username = isset($_SESSION['user_name']) ? $_SESSION['user_name'] : "Invité";
     <?php foreach ($books as $book): ?>
         <div class="book-card">
             <a href="details.php?id=<?php echo $book['idLivre']; ?>" class="book-img-link">
-                <img src="assests/uploads/book-covers/<?php echo $book['image']; ?>" alt="Couverture">
+                <img src="uploads/book-covers/<?php echo $book['image']; ?>" alt="Couverture">
             </a>
 
             <div class="book-info">

@@ -33,37 +33,50 @@ $dernieresCommandes = $pdo->query("
 <?php include '../includes/nav.php'; ?>
 
 <div class="main">
-
     <!-- Stats -->
     <div class="box-container">
-        <div class="box">
-            <div class="text">
-                <h2><?= $livres ?></h2>
-                <p>Books</p>
+
+        <a href="books.php" class="box-link">
+            <div class="box box-1">
+                <div class="text">
+                    <h2><?= $livres ?></h2>
+                    <p>Books</p>
+                </div>
+                <span class="box-icon">📚</span>
             </div>
-            <span class="box-icon">📚</span>
-        </div>
-        <div class="box">
-            <div class="text">
-                <h2><?= $clients ?></h2>
-                <p>Clients</p>
+        </a>
+
+        <a href="users.php" class="box-link">
+            <div class="box box-2">
+                <div class="text">
+                    <h2><?= $clients ?></h2>
+                    <p>Clients</p>
+                </div>
+                <span class="box-icon">👥</span>
             </div>
-            <span class="box-icon">👥</span>
-        </div>
-        <div class="box">
-            <div class="text">
-                <h2><?= $commandes ?></h2>
-                <p>Orders</p>
+        </a>
+
+        <a href="orders.php" class="box-link">
+            <div class="box box-3">
+                <div class="text">
+                    <h2><?= $commandes ?></h2>
+                    <p>Orders</p>
+                </div>
+                <span class="box-icon">📦</span>
             </div>
-            <span class="box-icon">📦</span>
-        </div>
-        <div class="box">
-            <div class="text">
-                <h2><?= $enAttente ?></h2>
-                <p>Pending</p>
+        </a>
+
+        <!-- Pending → filtered orders page -->
+        <a href="orders.php?status=en+attente" class="box-link">
+            <div class="box box-4">
+                <div class="text">
+                    <h2><?= $enAttente ?></h2>
+                    <p>Pending</p>
+                </div>
+                <span class="box-icon">⏳</span>
             </div>
-            <span class="box-icon">⏳</span>
-        </div>
+        </a>
+
     </div>
 
     <!-- Recent Orders -->
@@ -96,8 +109,7 @@ $dernieresCommandes = $pdo->query("
         </table>
     </div>
 
-</div>
-</div><!-- /.main-container -->
+</div><!-- /.main -->
 
 <script>
 document.querySelector(".menuicn").addEventListener("click", () => {

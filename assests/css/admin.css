@@ -3,7 +3,6 @@
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Poppins", sans-serif; }
 
 :root {
-    /* Same warm palette as auth.css */
     --brown-dark:  #3B2415;
     --brown-mid:   #5C3D2E;
     --brown-light: #8B6F47;
@@ -14,7 +13,6 @@
     --red-soft:    #A63D40;
     --white:       #FFFDF9;
 
-    /* Admin mappings */
     --primary:    #3B2415;
     --secondary:  #5C3D2E;
     --accent:     #A63D40;
@@ -122,6 +120,11 @@ header {
     gap: 20px;
     margin-bottom: 40px;
 }
+.box-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
 .box {
     height: 120px;
     width: 200px;
@@ -135,10 +138,13 @@ header {
     transition: transform 0.3s ease-in-out;
 }
 .box:hover { transform: scale(1.05); }
-.box:nth-child(1) { background: linear-gradient(135deg, var(--brown-dark), var(--brown-mid)); }
-.box:nth-child(2) { background: linear-gradient(135deg, var(--green-dark), var(--green-mid)); }
-.box:nth-child(3) { background: linear-gradient(135deg, #7B4F2E, var(--brown-light)); }
-.box:nth-child(4) { background: linear-gradient(135deg, #8B2020, var(--red-soft)); }
+
+/* ✅ Fixed: use explicit classes instead of nth-child (nth-child was targeting .box-link, not .box) */
+.box.box-1 { background: linear-gradient(135deg, var(--brown-dark), var(--brown-mid)); }
+.box.box-2 { background: linear-gradient(135deg, var(--green-dark), var(--green-mid)); }
+.box.box-3 { background: linear-gradient(135deg, #7B4F2E, var(--brown-light)); }
+.box.box-4 { background: linear-gradient(135deg, #8B2020, var(--red-soft)); }
+
 .box .text { color: white; }
 .box .text h2 { font-size: 28px; font-weight: 700; }
 .box .text p  { font-size: 12px; font-weight: 400; opacity: 0.85; }
