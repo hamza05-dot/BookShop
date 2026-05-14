@@ -97,7 +97,7 @@ $clients = $pdo->query("
             <tbody>
             <?php foreach ($admins as $a): ?>
             <tr>
-                <td><?= $a['image'] ? '<img class="user-avatar" src="../uploads/client'.$a['image'].'">' : '<span class="avatar-placeholder">👤</span>' ?></td>
+                <td><?= $a['image'] ? '<img class="user-avatar" src="../uploads/users/'.$a['image'].'">' : '<span class="avatar-placeholder">👤</span>' ?></td>
                 <td><strong><?= htmlspecialchars($a['nomUser'].' '.$a['prenomUser']) ?></strong></td>
                 <td><?= htmlspecialchars($a['email']) ?></td>
                 <td>
@@ -140,7 +140,7 @@ $clients = $pdo->query("
             <tr class="client-row clickable-row"
                 data-search="<?= strtolower($c['nomUser'].' '.$c['prenomUser'].' '.$c['email']) ?>"
                 onclick="openModal(<?= htmlspecialchars(json_encode($c)) ?>)">
-                <td><?= $c['image'] ? '<img class="user-avatar" src="../uploads/'.htmlspecialchars($c['image']).'">' : '<span class="avatar-placeholder">👤</span>' ?></td>
+                <td><?= $c['image'] ? '<img class="user-avatar" src="../uploads/users/'.htmlspecialchars($c['image']).'">' : '<span class="avatar-placeholder">👤</span>' ?></td>
                 <td><strong><?= htmlspecialchars($c['nomUser'].' '.$c['prenomUser']) ?></strong></td>
                 <td><?= htmlspecialchars($c['email']) ?></td>
                 <td><?= htmlspecialchars($c['ville'] ?? '—') ?></td>
@@ -197,7 +197,7 @@ function openModal(c) {
     document.getElementById('modalJoined').textContent  = c.createdAt ? c.createdAt.substring(0,10) : '—';
     const avatar = document.getElementById('modalAvatar');
     avatar.innerHTML = c.image
-        ? `<img class="modal-avatar" src="../uploads/${c.image}">`
+        ? `<img class="modal-avatar" src="../uploads/users/${c.image}">`
         : `<div class="modal-avatar-placeholder">👤</div>`;
     document.getElementById('clientModal').classList.add('open');
 }
