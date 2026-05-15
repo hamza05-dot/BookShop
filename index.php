@@ -2,6 +2,11 @@
 session_start();
 require_once 'includes/db.php';
 
+
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'client') {
+    header('Location: Login.php');
+    exit();
+}
 // Récupération des livres
 $query = $pdo->query("SELECT * FROM livre");
 $books = $query->fetchAll(PDO::FETCH_ASSOC);
