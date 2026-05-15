@@ -2,8 +2,9 @@
 session_start();
 require_once 'includes/db.php';
 
-$isLoggedIn = isset($_SESSION['user_id']);
-$username = $_SESSION['user_name'] ?? "Invité";
+// ✅ Noms corrects selon login.php
+$isLoggedIn = isset($_SESSION['idUser']);
+$username   = $_SESSION['nomUser'] ?? "Invité";
 
 // Récupération livres
 $query = $pdo->query("SELECT * FROM livre");
@@ -40,28 +41,29 @@ $books = $query->fetchAll(PDO::FETCH_ASSOC);
 
                 <a href="index.php"><i class="fas fa-home"></i> Accueil</a>
 
-                <!-- ✅ Panier : redirige vers login si non connecté -->
                 <?php if ($isLoggedIn): ?>
+
                     <a href="panier.php" class="cart-link">
                         <i class="fas fa-shopping-basket"></i>
                         Panier (<?php echo isset($_SESSION['panier']) ? array_sum($_SESSION['panier']) : 0; ?>)
                     </a>
+
+                    <span class="welcome-user">
+                        👋 Bonjour <?php echo htmlspecialchars($username); ?>
+                    </span>
+
+                    <a href="logout.php"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>
+
                 <?php else: ?>
+
                     <a href="login.php" class="cart-link">
                         <i class="fas fa-shopping-basket"></i>
                         Panier
                     </a>
-                <?php endif; ?>
 
-                <!-- ✅ Toujours visible : Login + Register pour invité, Profil + Logout pour connecté -->
-                <?php if ($isLoggedIn): ?>
-                    <span class="welcome-user">
-                        👋 Bonjour <?php echo htmlspecialchars($username); ?>
-                    </span>
-                    <a href="logout.php"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>
-                <?php else: ?>
                     <a href="login.php"><i class="fas fa-sign-in-alt"></i> Connexion</a>
                     <a href="register.php"><i class="fas fa-user-plus"></i> Créer compte</a>
+
                 <?php endif; ?>
 
             </div>
@@ -82,7 +84,8 @@ $books = $query->fetchAll(PDO::FETCH_ASSOC);
     <div class="book-card">
 
         <a href="details.php?id=<?php echo $book['idLivre']; ?>">
-            <img src="uploads/book-covers/<?php echo htmlspecialchars($book['image']); ?>" alt="<?php echo htmlspecialchars($book['titre']); ?>">
+            <img src="uploads/book-covers/<?php echo htmlspecialchars($book['image']); ?>"
+                 alt="<?php echo htmlspecialchars($book['titre']); ?>">
         </a>
 
         <div class="book-info">
@@ -93,7 +96,7 @@ $books = $query->fetchAll(PDO::FETCH_ASSOC);
                 <?php echo number_format($book['prix'], 3); ?> DT
             </p>
 
-            <form action="<?php echo $isLoggedIn ? 'ajouter_panier.php' : 'login.php'; ?>" method="POST">
+            <form action="<?php echo $isLoggedIn ? 'ajouter_panier.php' : '#'; ?>" method="POST">
 
                 <input type="hidden" name="idLivre" value="<?php echo $book['idLivre']; ?>">
 
@@ -104,14 +107,17 @@ $books = $query->fetchAll(PDO::FETCH_ASSOC);
                 </div>
 
                 <?php if ($isLoggedIn): ?>
+
                     <button type="submit" class="btn-green-add">
                         Ajouter au panier
                     </button>
+
                 <?php else: ?>
-                    <!-- ✅ Bouton visible mais redirige vers login proprement -->
+
                     <button type="button" onclick="showLoginAlert()" class="btn-green-add">
                         Ajouter au panier
                     </button>
+
                 <?php endif; ?>
 
             </form>
