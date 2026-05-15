@@ -1,25 +1,51 @@
 <?php
 session_start();
-$conn = mysqli_connect("localhost", "root", "", "bookdb");
+require_once 'includes/db.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && !empty($_SESSION['panier'])) {
-    
-    // Récupération des données du formulaire
-    $adresse = mysqli_real_escape_string($conn, $_POST['adresse']);
-    $telephone = mysqli_real_escape_string($conn, $_POST['tel']);
-    $methode = mysqli_real_escape_string($conn, $_POST['p']);
-    
-    // Génération d'une référence de commande unique
-    $order_ref = "BK-" . strtoupper(substr(md5(time()), 0, 8));
-    $_SESSION['derniere_commande'] = $order_ref;
 
-    /* Note : Tu peux insérer ici tes requêtes SQL INSERT INTO 
-       pour sauvegarder la commande en base de données.
-    */
+    $idClient = $_SESSION['idUser'];
 
-    // Redirection vers la page de suivi dynamique
+    // ✅ Calculer le total
+    $total = 0;
+    foreach ($_SESSION['panier'] as $idLivre => $qte) {
+        $stmtLivre = $pdo->prepare("SELECT prix FROM livre WHERE idLivre = ?");
+        $stmtLivre->execute([$idLivre]);
+        $livre = $stmtLivre->fetch(PDO::FETCH_ASSOC);
+        if ($livre) $total += $livre['prix'] * $qte;
+    }
+
+    // ✅ 1. Insérer dans commande
+    $stmt = $pdo->prepare("
+        INSERT INTO commande (idClient, total, status, createdAt)
+        VALUES (?, ?, 'en attente', NOW())
+    ");
+    $stmt->execute([$idClient, $total]);
+
+    $idCom = $pdo->lastInsertId();
+
+    // ✅ 2. Insérer dans ligne_commande
+    foreach ($_SESSION['panier'] as $idLivre => $qte) {
+
+        $stmtLivre = $pdo->prepare("SELECT prix FROM livre WHERE idLivre = ?");
+        $stmtLivre->execute([$idLivre]);
+        $livre = $stmtLivre->fetch(PDO::FETCH_ASSOC);
+
+        if ($livre) {
+            $stmtLigne = $pdo->prepare("
+                INSERT INTO ligne_commande (idCom, idLivre, quantite, prixUnit)
+                VALUES (?, ?, ?, ?)
+            ");
+            $stmtLigne->execute([$idCom, $idLivre, $qte, $livre['prix']]);
+        }
+    }
+
+    // ✅ 3. Vider le panier
+    unset($_SESSION['panier']);
+
     header("Location: confirmation.php");
     exit();
+
 } else {
     header("Location: panier.php");
     exit();
