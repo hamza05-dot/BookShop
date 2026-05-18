@@ -5,17 +5,9 @@ require_once 'includes/db.php';
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && !empty($_SESSION['panier'])) {
 
     $idClient = $_SESSION['idUser'];
+    $total    = $_POST['total']; // ✅ envoyé depuis panier.php
 
-    // ✅ Calculer le total
-    $total = 0;
-    foreach ($_SESSION['panier'] as $idLivre => $qte) {
-        $stmtLivre = $pdo->prepare("SELECT prix FROM livre WHERE idLivre = ?");
-        $stmtLivre->execute([$idLivre]);
-        $livre = $stmtLivre->fetch(PDO::FETCH_ASSOC);
-        if ($livre) $total += $livre['prix'] * $qte;
-    }
-
-    // ✅ 1. Insérer dans commande
+    // 1. Insérer dans commande
     $stmt = $pdo->prepare("
         INSERT INTO commande (idClient, total, status, createdAt)
         VALUES (?, ?, 'en attente', NOW())
@@ -24,23 +16,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && !empty($_SESSION['panier'])) {
 
     $idCom = $pdo->lastInsertId();
 
-    // ✅ 2. Insérer dans ligne_commande
+    // 2. Insérer chaque ligne
     foreach ($_SESSION['panier'] as $idLivre => $qte) {
 
         $stmtLivre = $pdo->prepare("SELECT prix FROM livre WHERE idLivre = ?");
         $stmtLivre->execute([$idLivre]);
-        $livre = $stmtLivre->fetch(PDO::FETCH_ASSOC);
+        $livre = $stmtLivre->fetch();
 
         if ($livre) {
-            $stmtLigne = $pdo->prepare("
+            $pdo->prepare("
                 INSERT INTO ligne_commande (idCom, idLivre, quantite, prixUnit)
                 VALUES (?, ?, ?, ?)
-            ");
-            $stmtLigne->execute([$idCom, $idLivre, $qte, $livre['prix']]);
+            ")->execute([$idCom, $idLivre, $qte, $livre['prix']]);
         }
     }
 
-    // ✅ 3. Vider le panier
+    // 3. Vider panier
     unset($_SESSION['panier']);
 
     header("Location: confirmation.php");

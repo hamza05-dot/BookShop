@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-// ✅ Fix session
 if (!isset($_SESSION['idUser'])) {
     header("Location: login.php");
     exit();
@@ -18,6 +17,8 @@ if (isset($_POST['idLivre'], $_POST['quantite'])) {
     }
 }
 
-header("Location: panier.php");
+// ✅ Go back to where the user came from
+$referer = $_SERVER['HTTP_REFERER'] ?? 'index.php';
+header("Location: " . $referer);
 exit();
 ?>
