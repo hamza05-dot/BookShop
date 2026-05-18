@@ -36,6 +36,8 @@ $categories = $pdo->query("
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Categories — BookShop Admin</title>
     <link rel="stylesheet" href="../assests/css/admin.css">
+    <!-- jQuery CDN -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <style>.clickable-cat { color:var(--secondary); cursor:pointer; font-weight:600; text-decoration:underline; }</style>
 </head>
 <body>
@@ -73,5 +75,12 @@ $categories = $pdo->query("
     </div>
 </div>
 </div>
-<script>document.querySelector(".menuicn").addEventListener("click", () => { document.querySelector(".navcontainer").classList.toggle("navclose"); });</script>
+<script>
+$(document).ready(function () {
+    // toggle sidebar
+    $(".menuicn").on("click", function () {
+        $(".navcontainer").toggleClass("navclose");
+    });
+});
+</script>
 </body></html>

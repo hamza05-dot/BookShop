@@ -1,11 +1,14 @@
 <?php
 session_start();
 require_once '../includes/db.php';
+
+// Vérif session admin
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') { header('Location: ../login.php'); exit(); }
 
 $activePage = 'books';
 $message = '';
 
+// Suppression d'un livre
 if (isset($_GET['delete'])) {
     $id = (int)$_GET['delete'];
     $pdo->prepare("DELETE FROM livre_auteur    WHERE idLivre = ?")->execute([$id]);
@@ -15,6 +18,7 @@ if (isset($_GET['delete'])) {
     $message = "Book deleted.";
 }
 
+// Récupérer tous les livres avec auteur + catégories
 $livres = $pdo->query("
     SELECT l.*,
            GROUP_CONCAT(DISTINCT c.nomCat SEPARATOR ', ') AS categories,
@@ -44,6 +48,9 @@ $livres = $pdo->query("
         .clickable-title { color:var(--secondary); cursor:pointer; font-weight:600; text-decoration:underline; }
         .clickable-title:hover { color:var(--primary); }
     </style>
+
+    <!-- jQuery CDN -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
 <body>
 <?php include '../includes/nav.php'; ?>
@@ -55,7 +62,8 @@ $livres = $pdo->query("
             <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
                 <div class="search-wrap">
                     <span>🔍</span>
-                    <input type="text" id="bookSearch" placeholder="Search title, author…" oninput="filterBooks(this.value)">
+                    <!-- Input de recherche en temps réel -->
+                    <input type="text" id="bookSearch" placeholder="Search title, author…">
                 </div>
                 <a class="btn btn-primary" href="add-book.php">＋ Add Book</a>
             </div>
@@ -97,17 +105,28 @@ $livres = $pdo->query("
     </div>
 </div>
 </div>
+
 <script>
-function filterBooks(q) {
-    q = q.toLowerCase();
-    let visible = 0;
-    document.querySelectorAll('.book-row').forEach(row => {
-        const match = !q || row.dataset.search.includes(q);
-        row.style.display = match ? '' : 'none';
-        if (match) visible++;
+    // Filtre live sur titre / auteur / catégorie
+    $("#bookSearch").on("input", function () {
+        var q = $(this).val().toLowerCase();
+        var visible = 0;
+
+        $(".book-row").each(function () {
+            // Vérifie si le texte du row contient la recherche
+            var match = !q || $(this).data("search").includes(q);
+            $(this).toggle(match);
+            if (match) visible++;
+        });
+
+        // Met à jour le compteur affiché
+        $("#bookCount").text(visible);
     });
-    document.getElementById('bookCount').textContent = visible;
-}
-document.querySelector(".menuicn").addEventListener("click", () => { document.querySelector(".navcontainer").classList.toggle("navclose"); });
+
+    // Toggle sidebar
+    $(".menuicn").on("click", function () {
+        $(".navcontainer").toggleClass("navclose");
+    });
 </script>
-</body></html>
+</body>
+</html>

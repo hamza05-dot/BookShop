@@ -2,6 +2,7 @@
 session_start();
 require_once '../includes/db.php';
 
+// Vérif session admin
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     header('Location: ../login.php');
     exit();
@@ -9,11 +10,13 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
 
 $activePage = 'dashboard';
 
+// Stats globales
 $livres    = $pdo->query("SELECT COUNT(*) FROM livre")->fetchColumn();
 $clients   = $pdo->query("SELECT COUNT(*) FROM client")->fetchColumn();
 $commandes = $pdo->query("SELECT COUNT(*) FROM commande")->fetchColumn();
 $enAttente = $pdo->query("SELECT COUNT(*) FROM commande WHERE status = 'en attente'")->fetchColumn();
 
+// 5 dernières commandes
 $dernieresCommandes = $pdo->query("
     SELECT c.idCom, c.status, c.total, c.createdAt, u.nomUser, u.prenomUser
     FROM commande c
@@ -28,12 +31,16 @@ $dernieresCommandes = $pdo->query("
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard — BookShop Admin</title>
     <link rel="stylesheet" href="../assests/css/admin.css">
+
+    <!-- jQuery CDN -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
 <body>
 <?php include '../includes/nav.php'; ?>
 
 <div class="main">
-    <!-- Stats -->
+
+    <!-- Stats cards -->
     <div class="box-container">
 
         <a href="books.php" class="box-link">
@@ -66,7 +73,6 @@ $dernieresCommandes = $pdo->query("
             </div>
         </a>
 
-        <!-- Pending → filtered orders page -->
         <a href="orders.php?status=en+attente" class="box-link">
             <div class="box box-4">
                 <div class="text">
@@ -79,7 +85,7 @@ $dernieresCommandes = $pdo->query("
 
     </div>
 
-    <!-- Recent Orders -->
+    <!-- Tableau dernières commandes -->
     <div class="report-container">
         <div class="report-header">
             <h2>Recent Orders</h2>
@@ -112,9 +118,10 @@ $dernieresCommandes = $pdo->query("
 </div><!-- /.main -->
 
 <script>
-document.querySelector(".menuicn").addEventListener("click", () => {
-    document.querySelector(".navcontainer").classList.toggle("navclose");
-});
+    // Toggle sidebar au click du menu icon
+    $(".menuicn").on("click", function () {
+        $(".navcontainer").toggleClass("navclose");
+    });
 </script>
 </body>
 </html>

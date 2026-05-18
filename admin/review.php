@@ -6,14 +6,11 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') { header('Locati
 $activePage = 'reviews';
 $message = '';
 
-// DELETE REVIEW
 if (isset($_GET['delete'])) {
     $pdo->prepare("DELETE FROM avis WHERE idAvis = ?")->execute([(int)$_GET['delete']]);
     $message = "Review deleted.";
 }
 
-// FETCH ALL REVIEWS
-// avis → ligne_commande → livre + commande → utilisateur
 $reviews = $pdo->query("
     SELECT av.idAvis, av.note, av.commentaire, av.createdAt,
            l.titre, l.idLivre,
@@ -26,7 +23,6 @@ $reviews = $pdo->query("
     ORDER BY av.createdAt DESC
 ")->fetchAll();
 
-// STATS
 $totalReviews = count($reviews);
 $avgNote = $totalReviews > 0
     ? number_format(array_sum(array_column($reviews, 'note')) / $totalReviews, 1)
@@ -40,10 +36,12 @@ $fiveStars = count(array_filter($reviews, fn($r) => $r['note'] == 5));
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reviews — BookShop Admin</title>
     <link rel="stylesheet" href="../assests/css/admin.css">
+    <!-- jQuery CDN -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <style>
-        .stars { color: #C9A84C; font-size: 15px; letter-spacing: 1px; }
-        .stars-gray { color: #ddd; }
-        .review-comment { font-size: 13px; color: #666; font-style: italic; max-width: 300px; }
+        .stars { color:#C9A84C; font-size:15px; letter-spacing:1px; }
+        .stars-gray { color:#ddd; }
+        .review-comment { font-size:13px; color:#666; font-style:italic; max-width:300px; }
         .search-wrap { display:flex; align-items:center; background:#f5f7fa; border:1.5px solid #e0e4ed; border-radius:25px; padding:6px 14px; gap:8px; }
         .search-wrap:focus-within { border-color:var(--brown-light); background:#fff; }
         #reviewSearch { border:none; background:transparent; outline:none; font-size:13px; font-family:"Poppins",sans-serif; width:220px; }
@@ -61,20 +59,10 @@ $fiveStars = count(array_filter($reviews, fn($r) => $r['note'] == 5));
         <div class="message-box success">✓ <?= $message ?></div>
     <?php endif; ?>
 
-    <!-- Mini stats -->
     <div class="stats-row">
-        <div class="stat-mini">
-            <div class="num"><?= $totalReviews ?></div>
-            <div class="lbl">Total Reviews</div>
-        </div>
-        <div class="stat-mini">
-            <div class="num" style="color:#C9A84C;">⭐ <?= $avgNote ?></div>
-            <div class="lbl">Average Rating</div>
-        </div>
-        <div class="stat-mini">
-            <div class="num" style="color:#27ae60;"><?= $fiveStars ?></div>
-            <div class="lbl">5-Star Reviews</div>
-        </div>
+        <div class="stat-mini"><div class="num"><?= $totalReviews ?></div><div class="lbl">Total Reviews</div></div>
+        <div class="stat-mini"><div class="num" style="color:#C9A84C;">⭐ <?= $avgNote ?></div><div class="lbl">Average Rating</div></div>
+        <div class="stat-mini"><div class="num" style="color:#27ae60;"><?= $fiveStars ?></div><div class="lbl">5-Star Reviews</div></div>
     </div>
 
     <div class="report-container">
@@ -82,22 +70,14 @@ $fiveStars = count(array_filter($reviews, fn($r) => $r['note'] == 5));
             <h2>⭐ All Reviews (<span id="reviewCount"><?= $totalReviews ?></span>)</h2>
             <div class="search-wrap">
                 <span>🔍</span>
-                <input type="text" id="reviewSearch" placeholder="Search book or client…"
-                       oninput="filterReviews(this.value)">
+                <!-- oninput removed — handled by jQuery below -->
+                <input type="text" id="reviewSearch" placeholder="Search book or client…">
             </div>
         </div>
 
         <table id="reviewTable">
             <thead>
-            <tr>
-                <th>#</th>
-                <th>Client</th>
-                <th>Book</th>
-                <th>Rating</th>
-                <th>Comment</th>
-                <th>Date</th>
-                <th>Action</th>
-            </tr>
+            <tr><th>#</th><th>Client</th><th>Book</th><th>Rating</th><th>Comment</th><th>Date</th><th>Action</th></tr>
             </thead>
             <tbody>
             <?php foreach ($reviews as $r): ?>
@@ -112,12 +92,8 @@ $fiveStars = count(array_filter($reviews, fn($r) => $r['note'] == 5));
                     </a>
                 </td>
                 <td>
-                    <span class="stars">
-                        <?= str_repeat('★', (int)$r['note']) ?>
-                    </span>
-                    <span class="stars-gray">
-                        <?= str_repeat('★', 5 - (int)$r['note']) ?>
-                    </span>
+                    <span class="stars"><?= str_repeat('★', (int)$r['note']) ?></span>
+                    <span class="stars-gray"><?= str_repeat('★', 5 - (int)$r['note']) ?></span>
                     <span style="font-size:12px; color:#aaa; margin-left:4px;">(<?= $r['note'] ?>/5)</span>
                 </td>
                 <td>
@@ -127,9 +103,7 @@ $fiveStars = count(array_filter($reviews, fn($r) => $r['note'] == 5));
                         <em style="color:#ccc; font-size:12px;">No comment</em>
                     <?php endif; ?>
                 </td>
-                <td style="font-size:12px; color:#888;">
-                    <?= date('d/m/Y', strtotime($r['createdAt'])) ?>
-                </td>
+                <td style="font-size:12px; color:#888;"><?= date('d/m/Y', strtotime($r['createdAt'])) ?></td>
                 <td>
                     <a class="btn btn-danger"
                        href="?delete=<?= $r['idAvis'] ?>"
@@ -147,18 +121,27 @@ $fiveStars = count(array_filter($reviews, fn($r) => $r['note'] == 5));
 </div>
 
 <script>
-function filterReviews(q) {
-    q = q.toLowerCase();
-    let visible = 0;
-    document.querySelectorAll('.review-row').forEach(row => {
-        const match = !q || row.dataset.search.includes(q);
-        row.style.display = match ? '' : 'none';
-        if (match) visible++;
+$(document).ready(function () {
+    // toggle sidebar
+    $(".menuicn").on("click", function () {
+        $(".navcontainer").toggleClass("navclose");
     });
-    document.getElementById('reviewCount').textContent = visible;
-}
-document.querySelector(".menuicn").addEventListener("click", () => {
-    document.querySelector(".navcontainer").classList.toggle("navclose");
+
+    // live search on reviews
+    $("#reviewSearch").on("input", function () {
+        const q = $(this).val().toLowerCase();
+        let visible = 0;
+
+        $(".review-row").each(function () {
+            // check if row matches search
+            const match = !q || $(this).data("search").includes(q);
+            $(this).toggle(match);
+            if (match) visible++;
+        });
+
+        // update counter
+        $("#reviewCount").text(visible);
+    });
 });
 </script>
 </body>

@@ -28,6 +28,8 @@ $authors = $pdo->query("
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Authors — BookShop Admin</title>
     <link rel="stylesheet" href="../assests/css/admin.css">
+    <!-- jQuery CDN -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <style>
         .author-avatar { width:42px; height:42px; border-radius:50%; object-fit:cover; }
         .avatar-ph { width:42px; height:42px; border-radius:50%; background:#dde; display:inline-flex; align-items:center; justify-content:center; font-size:20px; }
@@ -65,5 +67,12 @@ $authors = $pdo->query("
     </div>
 </div>
 </div>
-<script>document.querySelector(".menuicn").addEventListener("click", () => { document.querySelector(".navcontainer").classList.toggle("navclose"); });</script>
+<script>
+$(document).ready(function () {
+    // toggle sidebar
+    $(".menuicn").on("click", function () {
+        $(".navcontainer").toggleClass("navclose");
+    });
+});
+</script>
 </body></html>

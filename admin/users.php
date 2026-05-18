@@ -56,6 +56,8 @@ $clients = $pdo->query("
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Users — BookShop Admin</title>
     <link rel="stylesheet" href="../assests/css/admin.css">
+    <!-- jQuery CDN -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <style>
         .section-title { font-size:18px; font-weight:600; color:var(--primary); margin:30px 0 15px; }
         .search-wrap { display:flex; align-items:center; background:#f5f7fa; border:1.5px solid #e0e4ed; border-radius:25px; padding:6px 14px; gap:8px; }
@@ -129,7 +131,8 @@ $clients = $pdo->query("
         <p class="section-title" style="margin:0;">👥 Clients (<span id="clientCount"><?= count($clients) ?></span>)</p>
         <div class="search-wrap">
             <span>🔍</span>
-            <input type="text" id="clientSearch" placeholder="Search name or email…" oninput="filterClients(this.value)">
+            <!-- oninput retiré → géré par jQuery -->
+            <input type="text" id="clientSearch" placeholder="Search name or email…">
         </div>
     </div>
     <div class="report-container">
@@ -139,13 +142,13 @@ $clients = $pdo->query("
             <?php foreach ($clients as $c): ?>
             <tr class="client-row clickable-row"
                 data-search="<?= strtolower($c['nomUser'].' '.$c['prenomUser'].' '.$c['email']) ?>"
-                onclick="openModal(<?= htmlspecialchars(json_encode($c)) ?>)">
+                data-client="<?= htmlspecialchars(json_encode($c)) ?>">
                 <td><?= $c['image'] ? '<img class="user-avatar" src="../uploads/users/'.htmlspecialchars($c['image']).'">' : '<span class="avatar-placeholder">👤</span>' ?></td>
                 <td><strong><?= htmlspecialchars($c['nomUser'].' '.$c['prenomUser']) ?></strong></td>
                 <td><?= htmlspecialchars($c['email']) ?></td>
                 <td><?= htmlspecialchars($c['ville'] ?? '—') ?></td>
                 <td style="font-size:12px;"><?= date('d/m/Y', strtotime($c['createdAt'])) ?></td>
-                <td onclick="event.stopPropagation()">
+                <td class="stop-prop">
                     <a class="btn btn-danger" href="?delete=<?= $c['idUser'] ?>" onclick="return confirm('Delete this user?')">Delete</a>
                 </td>
             </tr>
@@ -158,7 +161,8 @@ $clients = $pdo->query("
 
 <div class="modal-overlay" id="clientModal">
     <div class="modal">
-        <button class="modal-close" onclick="closeModal()">✕</button>
+        <!-- bouton fermeture -->
+        <button class="modal-close" id="btnCloseModal">✕</button>
         <div class="modal-header">
             <div id="modalAvatar"></div>
             <div>
@@ -177,32 +181,68 @@ $clients = $pdo->query("
 </div>
 
 <script>
-function filterClients(q) {
-    q = q.toLowerCase();
-    let visible = 0;
-    document.querySelectorAll('.client-row').forEach(row => {
-        const match = !q || row.dataset.search.includes(q);
-        row.style.display = match ? '' : 'none';
-        if (match) visible++;
+$(document).ready(function () {
+
+    // ── Sidebar toggle ──
+    $(".menuicn").on("click", function () {
+        $(".navcontainer").toggleClass("navclose");
     });
-    document.getElementById('clientCount').textContent = visible;
-}
-function openModal(c) {
-    document.getElementById('modalName').textContent    = c.nomUser + ' ' + c.prenomUser;
-    document.getElementById('modalEmail').textContent   = c.email;
-    document.getElementById('modalPhone').textContent   = c.telephone || '—';
-    document.getElementById('modalCity').textContent    = c.ville || '—';
-    document.getElementById('modalAddress').textContent = c.adresse || '—';
-    document.getElementById('modalDob').textContent     = c.dateNaiss || '—';
-    document.getElementById('modalJoined').textContent  = c.createdAt ? c.createdAt.substring(0,10) : '—';
-    const avatar = document.getElementById('modalAvatar');
-    avatar.innerHTML = c.image
-        ? `<img class="modal-avatar" src="../uploads/users/${c.image}">`
-        : `<div class="modal-avatar-placeholder">👤</div>`;
-    document.getElementById('clientModal').classList.add('open');
-}
-function closeModal() { document.getElementById('clientModal').classList.remove('open'); }
-document.getElementById('clientModal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
-document.querySelector(".menuicn").addEventListener("click", () => { document.querySelector(".navcontainer").classList.toggle("navclose"); });
+
+    // ── Filtre recherche client ──
+    $("#clientSearch").on("input", function () {
+        const q = $(this).val().toLowerCase();
+        let visible = 0;
+
+        $(".client-row").each(function () {
+            // vérifie si la ligne correspond à la recherche
+            const match = !q || $(this).data("search").includes(q);
+            $(this).toggle(match);
+            if (match) visible++;
+        });
+
+        // met à jour le compteur
+        $("#clientCount").text(visible);
+    });
+
+    // ── Ouvrir modal au clic sur une ligne ──
+    $(".client-row").on("click", function () {
+        const c = $(this).data("client");
+
+        // rempli les champs du modal
+        $("#modalName").text(c.nomUser + ' ' + c.prenomUser);
+        $("#modalEmail").text(c.email);
+        $("#modalPhone").text(c.telephone || '—');
+        $("#modalCity").text(c.ville || '—');
+        $("#modalAddress").text(c.adresse || '—');
+        $("#modalDob").text(c.dateNaiss || '—');
+        $("#modalJoined").text(c.createdAt ? c.createdAt.substring(0, 10) : '—');
+
+        // avatar : image ou emoji
+        const avatar = c.image
+            ? `<img class="modal-avatar" src="../uploads/users/${c.image}">`
+            : `<div class="modal-avatar-placeholder">👤</div>`;
+        $("#modalAvatar").html(avatar);
+
+        $("#clientModal").addClass("open");
+    });
+
+    // ── Empêcher le clic sur "Delete" d'ouvrir le modal ──
+    $(".stop-prop").on("click", function (e) {
+        e.stopPropagation();
+    });
+
+    // ── Fermer modal (bouton ✕) ──
+    $("#btnCloseModal").on("click", function () {
+        $("#clientModal").removeClass("open");
+    });
+
+    // ── Fermer modal (clic en dehors) ──
+    $("#clientModal").on("click", function (e) {
+        if ($(e.target).is("#clientModal")) {
+            $(this).removeClass("open");
+        }
+    });
+
+});
 </script>
 </body></html>

@@ -30,6 +30,8 @@ $books = $pdo->query("
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($category['nomCat']) ?> — Category</title>
     <link rel="stylesheet" href="../assests/css/admin.css">
+    <!-- jQuery CDN -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <style>
         .back-link { display:inline-flex; align-items:center; gap:6px; color:var(--secondary); text-decoration:none; font-size:14px; margin-bottom:20px; }
         .cat-header { background:var(--primary); color:white; padding:25px 30px; border-radius:12px; margin-bottom:25px; }
@@ -69,5 +71,12 @@ $books = $pdo->query("
     </div>
 </div>
 </div>
-<script>document.querySelector(".menuicn").addEventListener("click", () => { document.querySelector(".navcontainer").classList.toggle("navclose"); });</script>
+<script>
+$(document).ready(function () {
+    // toggle sidebar
+    $(".menuicn").on("click", function () {
+        $(".navcontainer").toggleClass("navclose");
+    });
+});
+</script>
 </body></html>

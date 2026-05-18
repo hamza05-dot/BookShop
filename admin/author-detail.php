@@ -49,6 +49,8 @@ $books = $pdo->query("
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($author['prenom'].' '.$author['nom']) ?> — Author</title>
     <link rel="stylesheet" href="../assests/css/admin.css">
+    <!-- jQuery CDN -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <style>
         .author-profile { display:flex; gap:25px; align-items:flex-start; margin-bottom:25px; padding-bottom:20px; border-bottom:1px solid #eee; }
         .author-photo { width:110px; height:110px; border-radius:50%; object-fit:cover; border:3px solid #eee; box-shadow:0 4px 15px rgba(0,0,0,0.1); }
@@ -104,8 +106,9 @@ $books = $pdo->query("
             <div class="form-group"><label>Biography</label><textarea name="description"><?= htmlspecialchars($author['description'] ?? '') ?></textarea></div>
             <div class="form-group">
                 <label>Photo</label>
+                <!-- input file — onchange removed, handled by jQuery below -->
                 <label class="file-label" for="photoInput">
-                    <input type="file" id="photoInput" name="image" accept="image/*" onchange="previewPhoto(this)">
+                    <input type="file" id="photoInput" name="image" accept="image/*">
                     🧑 Choose a new photo…
                 </label>
                 <img id="photoPreview" alt="Preview">
@@ -138,13 +141,23 @@ $books = $pdo->query("
 </div>
 </div>
 <script>
-function previewPhoto(input) {
-    if (input.files && input.files[0]) {
+$(document).ready(function () {
+    // toggle sidebar
+    $(".menuicn").on("click", function () {
+        $(".navcontainer").toggleClass("navclose");
+    });
+
+    // preview photo before upload
+    $("#photoInput").on("change", function () {
+        const file = this.files[0];
+        if (!file) return;
         const reader = new FileReader();
-        reader.onload = e => { const p = document.getElementById('photoPreview'); p.src = e.target.result; p.style.display = 'block'; };
-        reader.readAsDataURL(input.files[0]);
-    }
-}
-document.querySelector(".menuicn").addEventListener("click", () => { document.querySelector(".navcontainer").classList.toggle("navclose"); });
+        reader.onload = function (e) {
+            // show preview image
+            $("#photoPreview").attr("src", e.target.result).show();
+        };
+        reader.readAsDataURL(file);
+    });
+});
 </script>
 </body></html>

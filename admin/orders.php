@@ -9,14 +9,12 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
 
 $message = '';
 
-// Handle status update
 if (isset($_POST['updateStatus'])) {
     $pdo->prepare("UPDATE commande SET status = ? WHERE idCom = ?")
         ->execute([$_POST['status'], $_POST['idCom']]);
     $message = "Statut mis à jour.";
 }
 
-// --- Filters ---
 $filterStatus = $_GET['status'] ?? '';
 $filterSearch = trim($_GET['search'] ?? '');
 
@@ -53,88 +51,18 @@ $commandes = $stmt->fetchAll();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Commandes — BookShop Admin</title>
     <link rel="stylesheet" href="../assests/css/admin.css">
+    <!-- jQuery CDN -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <style>
-        /* Filter bar */
-        .filter-bar {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            align-items: center;
-            margin-bottom: 20px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 14px 18px;
-            box-shadow: var(--shadow);
-        }
-        .filter-bar input[type="text"] {
-            flex: 1;
-            min-width: 200px;
-            padding: 9px 14px;
-            border: 1.5px solid var(--border);
-            border-radius: 8px;
-            font-size: 14px;
-            font-family: "Poppins", sans-serif;
-            background: rgba(245,240,232,0.7);
-            color: var(--brown-dark);
-            outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        .filter-bar input[type="text"]:focus {
-            border-color: var(--brown-light);
-            box-shadow: 0 0 0 3px rgba(139,111,71,0.12);
-            background: var(--white);
-        }
-        .filter-bar select {
-            padding: 9px 14px;
-            border: 1.5px solid var(--border);
-            border-radius: 8px;
-            font-size: 14px;
-            font-family: "Poppins", sans-serif;
-            background: rgba(245,240,232,0.7);
-            color: var(--brown-dark);
-            outline: none;
-            cursor: pointer;
-            transition: border-color 0.2s;
-        }
-        .filter-bar select:focus {
-            border-color: var(--brown-light);
-            box-shadow: 0 0 0 3px rgba(139,111,71,0.12);
-        }
-        .filter-bar .btn-reset {
-            background: transparent;
-            border: 1.5px solid var(--border);
-            color: var(--brown-mid);
-            padding: 8px 14px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-family: "Poppins", sans-serif;
-            cursor: pointer;
-            text-decoration: none;
-            transition: background 0.2s, color 0.2s;
-        }
-        .filter-bar .btn-reset:hover {
-            background: var(--bg-page);
-            color: var(--brown-dark);
-        }
-        .results-count {
-            font-size: 13px;
-            color: var(--brown-light);
-            margin-bottom: 10px;
-        }
-        /* Active filter pill */
-        .active-filter {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: rgba(201,168,76,0.15);
-            border: 1px solid rgba(201,168,76,0.35);
-            color: var(--brown-dark);
-            border-radius: 20px;
-            padding: 3px 10px;
-            font-size: 12px;
-            font-weight: 600;
-        }
+        .filter-bar { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:20px; background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:14px 18px; box-shadow:var(--shadow); }
+        .filter-bar input[type="text"] { flex:1; min-width:200px; padding:9px 14px; border:1.5px solid var(--border); border-radius:8px; font-size:14px; font-family:"Poppins",sans-serif; background:rgba(245,240,232,0.7); color:var(--brown-dark); outline:none; transition:border-color 0.2s,box-shadow 0.2s; }
+        .filter-bar input[type="text"]:focus { border-color:var(--brown-light); box-shadow:0 0 0 3px rgba(139,111,71,0.12); background:var(--white); }
+        .filter-bar select { padding:9px 14px; border:1.5px solid var(--border); border-radius:8px; font-size:14px; font-family:"Poppins",sans-serif; background:rgba(245,240,232,0.7); color:var(--brown-dark); outline:none; cursor:pointer; transition:border-color 0.2s; }
+        .filter-bar select:focus { border-color:var(--brown-light); box-shadow:0 0 0 3px rgba(139,111,71,0.12); }
+        .filter-bar .btn-reset { background:transparent; border:1.5px solid var(--border); color:var(--brown-mid); padding:8px 14px; border-radius:8px; font-size:13px; font-family:"Poppins",sans-serif; cursor:pointer; text-decoration:none; transition:background 0.2s,color 0.2s; }
+        .filter-bar .btn-reset:hover { background:var(--bg-page); color:var(--brown-dark); }
+        .results-count { font-size:13px; color:var(--brown-light); margin-bottom:10px; }
+        .active-filter { display:inline-flex; align-items:center; gap:6px; background:rgba(201,168,76,0.15); border:1px solid rgba(201,168,76,0.35); color:var(--brown-dark); border-radius:20px; padding:3px 10px; font-size:12px; font-weight:600; }
     </style>
 </head>
 <body>
@@ -146,7 +74,7 @@ $commandes = $stmt->fetchAll();
         <div class="message-box success">✓ <?= htmlspecialchars($message) ?></div>
     <?php endif; ?>
 
-    <!-- Filter Bar -->
+    <!-- filter form — submitted normally via GET -->
     <form method="GET" action="orders.php">
         <div class="filter-bar">
             <input
@@ -169,7 +97,6 @@ $commandes = $stmt->fetchAll();
         </div>
     </form>
 
-    <!-- Active filters display -->
     <?php if ($filterStatus !== '' || $filterSearch !== ''): ?>
     <p class="results-count">
         <?= count($commandes) ?> result<?= count($commandes) !== 1 ? 's' : '' ?> found
@@ -189,13 +116,7 @@ $commandes = $stmt->fetchAll();
         <table>
             <thead>
                 <tr>
-                    <th>#</th>
-                    <th>Client</th>
-                    <th>Total</th>
-                    <th>Date</th>
-                    <th>Statut</th>
-                    <th>Changer</th>
-                    <th>Détails</th>
+                    <th>#</th><th>Client</th><th>Total</th><th>Date</th><th>Statut</th><th>Changer</th><th>Détails</th>
                 </tr>
             </thead>
             <tbody>
@@ -220,7 +141,6 @@ $commandes = $stmt->fetchAll();
                 <td>
                     <form method="POST" style="display:flex; gap:5px;">
                         <input type="hidden" name="idCom" value="<?= $cmd['idCom'] ?>">
-                        <!-- Preserve filters after POST -->
                         <input type="hidden" name="_redirect_status" value="<?= htmlspecialchars($filterStatus) ?>">
                         <input type="hidden" name="_redirect_search" value="<?= htmlspecialchars($filterSearch) ?>">
                         <select name="status">
@@ -233,9 +153,7 @@ $commandes = $stmt->fetchAll();
                     </form>
                 </td>
                 <td>
-                    <a class="btn btn-primary" href="commande_detail.php?id=<?= $cmd['idCom'] ?>">
-                        👁 Voir
-                    </a>
+                    <a class="btn btn-primary" href="commande_detail.php?id=<?= $cmd['idCom'] ?>">👁 Voir</a>
                 </td>
             </tr>
             <?php endforeach; ?>
@@ -246,8 +164,11 @@ $commandes = $stmt->fetchAll();
 </div>
 
 <script>
-document.querySelector(".menuicn").addEventListener("click", () => {
-    document.querySelector(".navcontainer").classList.toggle("navclose");
+$(document).ready(function () {
+    // toggle sidebar
+    $(".menuicn").on("click", function () {
+        $(".navcontainer").toggleClass("navclose");
+    });
 });
 </script>
 </body>

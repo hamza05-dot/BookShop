@@ -1,6 +1,8 @@
 <?php
 session_start();
 require_once '../includes/db.php';
+
+// Vérif session admin
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') { header('Location: ../login.php'); exit(); }
 
 $activePage = 'books';
@@ -8,6 +10,7 @@ $message = '';
 $id = (int)($_GET['id'] ?? 0);
 if (!$id) { header('Location: books.php'); exit(); }
 
+// Mise à jour du livre
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $titre       = trim($_POST['titre']);
     $description = trim($_POST['description']);
@@ -15,14 +18,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stock       = (int)$_POST['stock'];
     $categories  = $_POST['categories'] ?? [];
     $image = $_POST['current_image'];
+
+    // Upload nouvelle image si fournie
     if (!empty($_FILES['image']['name'])) {
         $ext     = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
         $nomFich = time() . '_' . uniqid() . '.' . $ext;
         move_uploaded_file($_FILES['image']['tmp_name'], '../uploads/book-covers/' . $nomFich);
         $image = $nomFich;
     }
+
     $pdo->prepare("UPDATE livre SET titre=?, description=?, prix=?, stock=?, image=? WHERE idLivre=?")
         ->execute([$titre, $description, $prix, $stock, $image, $id]);
+
+    // Réassigner les catégories
     $pdo->prepare("DELETE FROM livre_categorie WHERE idLivre=?")->execute([$id]);
     foreach ($categories as $idCat) {
         $pdo->prepare("INSERT INTO livre_categorie (idLivre, idCat) VALUES (?,?)")->execute([$id, (int)$idCat]);
@@ -30,6 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $message = "Book updated successfully!";
 }
 
+// Récupérer le livre avec auteur et catégories
 $stmt = $pdo->prepare("
     SELECT l.*, GROUP_CONCAT(DISTINCT lc.idCat) AS cat_ids,
            CONCAT(a.prenom,' ',a.nom) AS auteur, a.idAuteur
@@ -68,13 +77,18 @@ $selectedCats  = $livre['cat_ids'] ? explode(',', $livre['cat_ids']) : [];
         #coverPreview { width:80px; height:105px; object-fit:cover; border-radius:6px; display:none; margin-top:8px; }
         .back-link { display:inline-flex; align-items:center; gap:6px; color:var(--secondary); text-decoration:none; font-size:14px; margin-bottom:20px; }
     </style>
+
+    <!-- jQuery CDN -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
 <body>
 <?php include '../includes/nav.php'; ?>
 <div class="main">
     <a class="back-link" href="books.php">← Back to All Books</a>
     <?php if ($message): ?><div class="message-box success">✓ <?= $message ?></div><?php endif; ?>
+
     <div class="form-box">
+        <!-- Aperçu actuel du livre -->
         <div class="book-preview">
             <?php if ($livre['image']): ?>
                 <img class="book-cover-lg" src="../uploads/book-covers/<?= htmlspecialchars($livre['image']) ?>">
@@ -89,6 +103,7 @@ $selectedCats  = $livre['cat_ids'] ? explode(',', $livre['cat_ids']) : [];
                 <p>🗓 Added: <?= date('d/m/Y', strtotime($livre['createdAt'])) ?></p>
             </div>
         </div>
+
         <h3>✏️ Edit Book</h3>
         <form method="POST" enctype="multipart/form-data" style="margin-top:16px;">
             <input type="hidden" name="current_image" value="<?= htmlspecialchars($livre['image']) ?>">
@@ -99,8 +114,9 @@ $selectedCats  = $livre['cat_ids'] ? explode(',', $livre['cat_ids']) : [];
                 </div>
                 <div class="form-group">
                     <label>New Cover Image</label>
+                    <!-- Input file caché, déclenché par le label -->
                     <label class="file-label" for="coverInput">
-                        <input type="file" id="coverInput" name="image" accept="image/*" onchange="previewCover(this)">
+                        <input type="file" id="coverInput" name="image" accept="image/*">
                         🖼️ Choose image…
                     </label>
                     <img id="coverPreview" alt="Preview">
@@ -127,8 +143,7 @@ $selectedCats  = $livre['cat_ids'] ? explode(',', $livre['cat_ids']) : [];
                         <?php $checked = in_array($cat['idCat'], $selectedCats); ?>
                         <label class="cat-chip <?= $checked ? 'checked' : '' ?>">
                             <input type="checkbox" name="categories[]" value="<?= $cat['idCat'] ?>"
-                                   <?= $checked ? 'checked' : '' ?>
-                                   onchange="this.closest('.cat-chip').classList.toggle('checked', this.checked)">
+                                   <?= $checked ? 'checked' : '' ?>>
                             <?= htmlspecialchars($cat['nomCat']) ?>
                         </label>
                     <?php endforeach; ?>
@@ -142,14 +157,30 @@ $selectedCats  = $livre['cat_ids'] ? explode(',', $livre['cat_ids']) : [];
     </div>
 </div>
 </div>
+
 <script>
-function previewCover(input) {
-    if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = e => { const prev = document.getElementById('coverPreview'); prev.src = e.target.result; prev.style.display = 'block'; };
-        reader.readAsDataURL(input.files[0]);
-    }
-}
-document.querySelector(".menuicn").addEventListener("click", () => { document.querySelector(".navcontainer").classList.toggle("navclose"); });
+    // Prévisualisation de l'image avant upload
+    $("#coverInput").on("change", function () {
+        var file = this.files[0];
+        if (!file) return;
+
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            // Affiche la preview
+            $("#coverPreview").attr("src", e.target.result).show();
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // Toggle checked sur les chips catégories
+    $(".cat-chip input[type='checkbox']").on("change", function () {
+        $(this).closest(".cat-chip").toggleClass("checked", this.checked);
+    });
+
+    // Toggle sidebar
+    $(".menuicn").on("click", function () {
+        $(".navcontainer").toggleClass("navclose");
+    });
 </script>
-</body></html>
+</body>
+</html>

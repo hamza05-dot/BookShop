@@ -60,6 +60,8 @@ $currentStatus = $statusLabels[$order['status']] ?? ['label' => $order['status']
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Commande #<?= $idCom ?> — BookShop Admin</title>
     <link rel="stylesheet" href="../assests/css/admin.css">
+    <!-- jQuery CDN -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <style>
         /* ── Layout ── */
         .detail-grid {
@@ -184,17 +186,12 @@ $currentStatus = $statusLabels[$order['status']] ?? ['label' => $order['status']
         }
         .status-form select {
             padding: 9px 14px; border: 1.5px solid #e2e8f0; border-radius: 10px;
-            font-size: 14px; font-family: "Poppins", sans-serif;
-            background: #f7f9fc; color: #2d3748; outline: none;
-            cursor: pointer; transition: border-color .2s;
+            font-size: 13px; font-family: "Poppins", sans-serif; background: #fff; cursor: pointer;
         }
-        .status-form select:focus { border-color: var(--secondary); }
 
-        /* ── Back link ── */
         .back-btn {
-            display: inline-flex; align-items: center; gap: 7px;
-            padding: 8px 16px; border-radius: 10px;
-            background: #f0f4ff; color: var(--primary);
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 8px 16px; background: #eef2ff; border-radius: 10px; color: var(--primary);
             font-size: 13px; font-weight: 600; text-decoration: none;
             transition: background .2s;
         }
@@ -227,7 +224,6 @@ $currentStatus = $statusLabels[$order['status']] ?? ['label' => $order['status']
             <h2 class="page-title">Détails de la commande</h2>
             <span class="order-id-badge">#<?= $idCom ?></span>
         </div>
-        <!-- Status update form in header -->
         <form method="POST" class="status-form">
             <select name="status">
                 <option value="en attente" <?= $order['status']==='en attente'?'selected':'' ?>>⏳ En attente</option>
@@ -374,9 +370,12 @@ $currentStatus = $statusLabels[$order['status']] ?? ['label' => $order['status']
 </div>
 
 <script>
-    document.querySelector(".menuicn").addEventListener("click", () => {
-        document.querySelector(".navcontainer").classList.toggle("navclose");
+$(document).ready(function () {
+    // ── Sidebar toggle ──
+    $(".menuicn").on("click", function () {
+        $(".navcontainer").toggleClass("navclose");
     });
+});
 </script>
 </body>
 </html>

@@ -74,6 +74,8 @@ $auteurs    = $pdo->query("SELECT * FROM auteur ORDER BY nom ASC")->fetchAll();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Book — BookShop Admin</title>
     <link rel="stylesheet" href="../assests/css/admin.css">
+    <!-- jQuery CDN -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <style>
         .tabs { display:flex; gap:0; margin-bottom:0; border-bottom:2px solid #e0e0e0; }
         .tab-btn {
@@ -157,9 +159,10 @@ $auteurs    = $pdo->query("SELECT * FROM auteur ORDER BY nom ASC")->fetchAll();
         <h3>📖 Add a New Book</h3>
 
         <div class="tabs" style="margin-top:16px;">
-            <button class="tab-btn active" onclick="switchTab('book-info', this)">① Book Info</button>
-            <button class="tab-btn"        onclick="switchTab('categories', this)">② Categories</button>
-            <button class="tab-btn"        onclick="switchTab('author', this)">③ Author</button>
+            <!-- onclick retiré → géré par jQuery avec data-tab -->
+            <button class="tab-btn active" data-tab="book-info">① Book Info</button>
+            <button class="tab-btn"        data-tab="categories">② Categories</button>
+            <button class="tab-btn"        data-tab="author">③ Author</button>
         </div>
 
         <form method="POST" enctype="multipart/form-data" id="bookForm">
@@ -176,8 +179,8 @@ $auteurs    = $pdo->query("SELECT * FROM auteur ORDER BY nom ASC")->fetchAll();
                     <div class="form-group">
                         <label>Cover Image</label>
                         <label class="file-label" for="bookImageInput">
-                            <input type="file" id="bookImageInput" name="image" accept="image/*"
-                                   onchange="previewImage(this,'bookImagePreview','bookFileName')">
+                            <!-- onchange retiré → géré par jQuery -->
+                            <input type="file" id="bookImageInput" name="image" accept="image/*">
                             🖼️ Choose an image…
                         </label>
                         <div class="file-name" id="bookFileName">No file chosen</div>
@@ -199,10 +202,8 @@ $auteurs    = $pdo->query("SELECT * FROM auteur ORDER BY nom ASC")->fetchAll();
                     <textarea name="description" placeholder="Book summary…"></textarea>
                 </div>
                 <div style="text-align:right; margin-top:10px;">
-                    <button type="button" class="btn btn-primary"
-                            onclick="switchTab('categories', document.querySelectorAll('.tab-btn')[1])">
-                        Next → Categories
-                    </button>
+                    <!-- bouton navigation tab avec data-target -->
+                    <button type="button" class="btn btn-primary btn-nav" data-target="categories">Next → Categories</button>
                 </div>
             </div>
 
@@ -215,8 +216,8 @@ $auteurs    = $pdo->query("SELECT * FROM auteur ORDER BY nom ASC")->fetchAll();
                     <div class="cat-grid" id="catGrid">
                         <?php foreach ($categories as $cat): ?>
                             <label class="cat-chip" id="chip-<?= $cat['idCat'] ?>">
-                                <input type="checkbox" name="categories[]" value="<?= $cat['idCat'] ?>"
-                                       onchange="toggleChip(this, 'chip-<?= $cat['idCat'] ?>')">
+                                <!-- onchange retiré → géré par jQuery -->
+                                <input type="checkbox" name="categories[]" value="<?= $cat['idCat'] ?>">
                                 <?= htmlspecialchars($cat['nomCat']) ?>
                             </label>
                         <?php endforeach; ?>
@@ -224,10 +225,8 @@ $auteurs    = $pdo->query("SELECT * FROM auteur ORDER BY nom ASC")->fetchAll();
                     <p style="font-size:12px; color:#aaa; margin-top:12px;">Click chips to select the book's categories.</p>
                 <?php endif; ?>
                 <div style="display:flex; justify-content:space-between; margin-top:20px;">
-                    <button type="button" class="btn btn-warning"
-                            onclick="switchTab('book-info', document.querySelectorAll('.tab-btn')[0])">← Back</button>
-                    <button type="button" class="btn btn-primary"
-                            onclick="switchTab('author', document.querySelectorAll('.tab-btn')[2])">Next → Author</button>
+                    <button type="button" class="btn btn-warning btn-nav" data-target="book-info">← Back</button>
+                    <button type="button" class="btn btn-primary btn-nav" data-target="author">Next → Author</button>
                 </div>
             </div>
 
@@ -235,10 +234,11 @@ $auteurs    = $pdo->query("SELECT * FROM auteur ORDER BY nom ASC")->fetchAll();
             <div class="tab-pane" id="tab-author">
                 <div class="section-divider">Choose or create an author</div>
                 <div class="author-toggle">
-                    <button type="button" class="toggle-btn active" id="btnExisting" onclick="setAuthorMode('existing')">
+                    <!-- onclick retiré → géré par jQuery avec data-mode -->
+                    <button type="button" class="toggle-btn active" id="btnExisting" data-mode="existing">
                         👤 Existing Author
                     </button>
-                    <button type="button" class="toggle-btn" id="btnNew" onclick="setAuthorMode('new')">
+                    <button type="button" class="toggle-btn" id="btnNew" data-mode="new">
                         ✏️ New Author
                     </button>
                 </div>
@@ -296,8 +296,8 @@ $auteurs    = $pdo->query("SELECT * FROM auteur ORDER BY nom ASC")->fetchAll();
                         <div class="form-group">
                             <label>Author Photo</label>
                             <label class="file-label" for="authorImageInput">
-                                <input type="file" id="authorImageInput" name="a_image" accept="image/*"
-                                       onchange="previewImage(this,'authorImagePreview','authorFileName')">
+                                <!-- onchange retiré → géré par jQuery -->
+                                <input type="file" id="authorImageInput" name="a_image" accept="image/*">
                                 🧑 Choose a photo…
                             </label>
                             <div class="file-name" id="authorFileName">No file chosen</div>
@@ -307,9 +307,8 @@ $auteurs    = $pdo->query("SELECT * FROM auteur ORDER BY nom ASC")->fetchAll();
                 </div>
 
                 <div style="display:flex; justify-content:space-between; margin-top:24px;">
-                    <button type="button" class="btn btn-warning"
-                            onclick="switchTab('categories', document.querySelectorAll('.tab-btn')[1])">← Back</button>
-                    <button type="submit" class="btn btn-success" onclick="return validateForm()">✓ Save Book</button>
+                    <button type="button" class="btn btn-warning btn-nav" data-target="categories">← Back</button>
+                    <button type="submit" class="btn btn-success" id="btnSave">✓ Save Book</button>
                 </div>
             </div>
 
@@ -317,62 +316,110 @@ $auteurs    = $pdo->query("SELECT * FROM auteur ORDER BY nom ASC")->fetchAll();
     </div>
 
 </div>
-</div><!-- /.main-container -->
+</div>
 
 <script>
-function switchTab(id, btn) {
-    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('tab-' + id).classList.add('active');
-    btn.classList.add('active');
-}
-function toggleChip(checkbox, chipId) {
-    document.getElementById(chipId).classList.toggle('checked', checkbox.checked);
-}
-function setAuthorMode(mode) {
-    document.getElementById('auteurMode').value = mode;
-    document.getElementById('existingAuthorSection').classList.toggle('visible', mode === 'existing');
-    document.getElementById('newAuthorSection').classList.toggle('visible', mode === 'new');
-    document.getElementById('btnExisting').classList.toggle('active', mode === 'existing');
-    document.getElementById('btnNew').classList.toggle('active', mode === 'new');
-    const sel = document.getElementById('auteurSelect');
-    if (sel) sel.required = (mode === 'existing');
-    document.querySelectorAll('[name="a_nom"],[name="a_prenom"]').forEach(el => {
-        el.required = (mode === 'new');
+$(document).ready(function () {
+
+    // ── Sidebar toggle ──
+    $(".menuicn").on("click", function () {
+        $(".navcontainer").toggleClass("navclose");
     });
-}
-function previewImage(input, previewId, fileNameId) {
-    const preview = document.getElementById(previewId);
-    const label   = document.getElementById(fileNameId);
-    if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = e => { preview.src = e.target.result; preview.style.display = 'block'; };
-        reader.readAsDataURL(input.files[0]);
-        label.textContent = input.files[0].name;
+
+    // ── Fonction switchTab ──
+    function switchTab(id) {
+        $(".tab-pane").removeClass("active");
+        $(".tab-btn").removeClass("active");
+        $("#tab-" + id).addClass("active");
+        $(".tab-btn[data-tab='" + id + "']").addClass("active");
     }
-}
-function validateForm() {
-    const titre = document.querySelector('[name="titre"]').value.trim();
-    if (!titre) {
-        alert('Please enter the book title.');
-        switchTab('book-info', document.querySelectorAll('.tab-btn')[0]);
-        return false;
+
+    // ── Clics sur les boutons de tab (header) ──
+    $(".tab-btn").on("click", function () {
+        switchTab($(this).data("tab"));
+    });
+
+    // ── Boutons de navigation entre tabs ──
+    $(".btn-nav").on("click", function () {
+        switchTab($(this).data("target"));
+    });
+
+    // ── Chip catégorie : toggle classe checked ──
+    $(".cat-chip input").on("change", function () {
+        $(this).closest(".cat-chip").toggleClass("checked", this.checked);
+    });
+
+    // ── Mode auteur (existing / new) ──
+    $(".toggle-btn").on("click", function () {
+        const mode = $(this).data("mode");
+        $("#auteurMode").val(mode);
+
+        // affiche/cache les sections
+        $("#existingAuthorSection").toggleClass("visible", mode === "existing");
+        $("#newAuthorSection").toggleClass("visible", mode === "new");
+
+        // active le bon bouton
+        $("#btnExisting, #btnNew").removeClass("active");
+        $(this).addClass("active");
+
+        // required dynamique
+        $("#auteurSelect").prop("required", mode === "existing");
+        $("[name='a_nom'], [name='a_prenom']").prop("required", mode === "new");
+    });
+
+    // ── Preview image générique (couverture + photo auteur) ──
+    function previewImage(input, previewId, fileNameId) {
+        const file = input.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                // affiche l'image et son nom
+                $("#" + previewId).attr("src", e.target.result).show();
+                $("#" + fileNameId).text(file.name);
+            };
+            reader.readAsDataURL(file);
+        }
     }
-    const mode = document.getElementById('auteurMode').value;
-    if (mode === 'existing') {
-        const sel = document.getElementById('auteurSelect');
-        if (sel && !sel.value) { alert('Please select an author.'); return false; }
-    } else {
-        const nom    = document.querySelector('[name="a_nom"]').value.trim();
-        const prenom = document.querySelector('[name="a_prenom"]').value.trim();
-        if (!nom || !prenom) { alert('Please enter the first and last name of the new author.'); return false; }
-    }
-    return true;
-}
-document.querySelector(".menuicn").addEventListener("click", () => {
-    document.querySelector(".navcontainer").classList.toggle("navclose");
+
+    // ── Preview couverture du livre ──
+    $("#bookImageInput").on("change", function () {
+        previewImage(this, "bookImagePreview", "bookFileName");
+    });
+
+    // ── Preview photo auteur ──
+    $("#authorImageInput").on("change", function () {
+        previewImage(this, "authorImagePreview", "authorFileName");
+    });
+
+    // ── Validation avant soumission ──
+    $("#btnSave").on("click", function (e) {
+        const titre = $("[name='titre']").val().trim();
+        if (!titre) {
+            alert("Please enter the book title.");
+            switchTab("book-info");
+            e.preventDefault();
+            return;
+        }
+        const mode = $("#auteurMode").val();
+        if (mode === "existing") {
+            if ($("#auteurSelect").length && !$("#auteurSelect").val()) {
+                alert("Please select an author.");
+                e.preventDefault();
+                return;
+            }
+        } else {
+            const nom    = $("[name='a_nom']").val().trim();
+            const prenom = $("[name='a_prenom']").val().trim();
+            if (!nom || !prenom) {
+                alert("Please enter the first and last name of the new author.");
+                e.preventDefault();
+            }
+        }
+    });
+
+    // ── Init : mode existing au chargement ──
+    $("#auteurSelect").prop("required", true);
 });
-setAuthorMode('existing');
 </script>
 </body>
 </html>

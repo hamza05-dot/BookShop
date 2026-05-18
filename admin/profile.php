@@ -453,7 +453,7 @@ $memberSince = date('F j, Y', strtotime($admin['createdAt']));
                         <?= strtoupper(mb_substr($admin['nomUser'],0,1)).strtoupper(mb_substr($admin['prenomUser'],0,1)) ?>
                     </div>
                 <?php endif; ?>
-                <button class="change-photo-btn" onclick="openModal('avatar')" title="Change photo">📷</button>
+                <button class="change-photo-btn" data-modal="avatar" title="Change photo">📷</button>
             </div>
             <div class="hero-info">
                 <div class="hero-name"><?= htmlspecialchars($admin['nomUser'].' '.$admin['prenomUser']) ?></div>
@@ -471,7 +471,7 @@ $memberSince = date('F j, Y', strtotime($admin['createdAt']));
                     <div class="ps-icon">👤</div>
                     Full Name
                 </div>
-                <button class="btn-edit-section" onclick="openModal('name')">✏ Edit</button>
+                <button class="btn-edit-section" data-modal="name">✏ Edit</button>
             </div>
             <div class="ps-body">
                 <div class="info-row">
@@ -494,7 +494,7 @@ $memberSince = date('F j, Y', strtotime($admin['createdAt']));
                     <div class="ps-icon">✉️</div>
                     Email Address
                 </div>
-                <button class="btn-edit-section" onclick="openModal('email')">✏ Edit</button>
+                <button class="btn-edit-section" data-modal="email">✏ Edit</button>
             </div>
             <div class="ps-body">
                 <div class="info-row">
@@ -513,7 +513,7 @@ $memberSince = date('F j, Y', strtotime($admin['createdAt']));
                     <div class="ps-icon">🔒</div>
                     Password
                 </div>
-                <button class="btn-edit-section" onclick="openModal('password')">✏ Change</button>
+                <button class="btn-edit-section" data-modal="password">✏ Change</button>
             </div>
             <div class="ps-body">
                 <div class="info-row">
@@ -536,7 +536,7 @@ $memberSince = date('F j, Y', strtotime($admin['createdAt']));
                     <div class="ps-icon">🖼</div>
                     Profile Photo
                 </div>
-                <button class="btn-edit-section" onclick="openModal('avatar')">✏ Change</button>
+                <button class="btn-edit-section" data-modal="avatar">✏ Change</button>
             </div>
             <div class="ps-body" style="display:flex; align-items:center; gap:16px;">
                 <?php if (!empty($admin['image'])): ?>
@@ -562,7 +562,7 @@ $memberSince = date('F j, Y', strtotime($admin['createdAt']));
 <!-- Edit Name -->
 <div class="modal-overlay" id="modal-name">
     <div class="modal">
-        <button class="modal-close" onclick="closeModal('name')">✕</button>
+        <button class="modal-close" data-modal="name">✕</button>
         <div class="modal-title">Edit Full Name</div>
         <form method="POST">
             <input type="hidden" name="field" value="name">
@@ -582,7 +582,7 @@ $memberSince = date('F j, Y', strtotime($admin['createdAt']));
 <!-- Edit Email -->
 <div class="modal-overlay" id="modal-email">
     <div class="modal">
-        <button class="modal-close" onclick="closeModal('email')">✕</button>
+        <button class="modal-close" data-modal="email">✕</button>
         <div class="modal-title">Edit Email Address</div>
         <form method="POST">
             <input type="hidden" name="field" value="email">
@@ -598,7 +598,7 @@ $memberSince = date('F j, Y', strtotime($admin['createdAt']));
 <!-- Edit Password -->
 <div class="modal-overlay" id="modal-password">
     <div class="modal">
-        <button class="modal-close" onclick="closeModal('password')">✕</button>
+        <button class="modal-close" data-modal="password">✕</button>
         <div class="modal-title">Change Password</div>
         <form method="POST">
             <input type="hidden" name="field" value="password">
@@ -608,7 +608,7 @@ $memberSince = date('F j, Y', strtotime($admin['createdAt']));
             </div>
             <div class="form-group">
                 <label>New Password</label>
-                <input type="password" name="newPassword" id="newPwd" required placeholder="Min. 6 characters" oninput="updateStrength(this.value)">
+                <input type="password" name="newPassword" id="newPwd" required placeholder="Min. 6 characters">
                 <div class="strength-bar-wrap"><div class="strength-bar" id="strengthBar"></div></div>
             </div>
             <div class="form-group">
@@ -623,7 +623,7 @@ $memberSince = date('F j, Y', strtotime($admin['createdAt']));
 <!-- Change Avatar -->
 <div class="modal-overlay" id="modal-avatar">
     <div class="modal">
-        <button class="modal-close" onclick="closeModal('avatar')">✕</button>
+        <button class="modal-close" data-modal="avatar">✕</button>
         <div class="modal-title">Change Profile Photo</div>
         <form method="POST" enctype="multipart/form-data">
             <input type="hidden" name="field" value="avatar">
@@ -631,8 +631,8 @@ $memberSince = date('F j, Y', strtotime($admin['createdAt']));
                 <img id="avatarPreviewImg" src="#" alt="Preview">
                 <p style="margin-top:8px;font-size:12px;color:var(--brown-light);">Preview</p>
             </div>
-            <div class="avatar-drop-zone" id="dropZone" onclick="document.getElementById('avatarFileInput').click()">
-                <input type="file" name="image" id="avatarFileInput" accept="image/*" onchange="previewAvatar(this)">
+            <div class="avatar-drop-zone" id="dropZone">
+                <input type="file" name="image" id="avatarFileInput" accept="image/*">
                 <div class="drop-icon">📁</div>
                 <p>Click to upload a photo</p>
                 <p style="margin-top:4px;font-size:11px;">JPEG, PNG, WEBP or GIF · Max 5 MB</p>
@@ -642,48 +642,64 @@ $memberSince = date('F j, Y', strtotime($admin['createdAt']));
     </div>
 </div>
 
+<!-- jQuery CDN -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script>
-function openModal(type) {
-    document.getElementById('modal-' + type).classList.add('open');
-}
-function closeModal(type) {
-    document.getElementById('modal-' + type).classList.remove('open');
-}
-document.querySelectorAll('.modal-overlay').forEach(el => {
-    el.addEventListener('click', function(e) {
-        if (e.target === this) this.classList.remove('open');
+$(function () {
+
+    // ── Open modal (buttons with data-modal attribute) ──────────────
+    $('[data-modal]').on('click', function () {
+        var type = $(this).data('modal');
+        $('#modal-' + type).addClass('open');
     });
-});
 
-function updateStrength(val) {
-    const bar = document.getElementById('strengthBar');
-    let score = 0;
-    if (val.length >= 6)  score++;
-    if (val.length >= 10) score++;
-    if (/[A-Z]/.test(val)) score++;
-    if (/[0-9]/.test(val)) score++;
-    if (/[^a-zA-Z0-9]/.test(val)) score++;
-    const colors = ['#ef4444','#f97316','#eab308','#22c55e','#10b981'];
-    const widths = ['20%','40%','60%','80%','100%'];
-    bar.style.width      = widths[score - 1] || '0';
-    bar.style.background = colors[score - 1] || '#eee';
-}
+    // ── Close modal when clicking the backdrop ──────────────────────
+    $('.modal-overlay').on('click', function (e) {
+        if ($(e.target).hasClass('modal-overlay')) {
+            $(this).removeClass('open');
+        }
+    });
 
-function previewAvatar(input) {
-    if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = e => {
-            document.getElementById('avatarPreviewImg').src = e.target.result;
-            document.getElementById('avatarPreviewWrap').style.display = 'block';
-            document.getElementById('dropZone').style.display = 'none';
-            document.getElementById('btnUpload').disabled = false;
+    // ── Password strength bar ───────────────────────────────────────
+    $('#newPwd').on('input', function () {
+        var val = $(this).val();
+        var score = 0;
+        if (val.length >= 6)           score++;
+        if (val.length >= 10)          score++;
+        if (/[A-Z]/.test(val))         score++;
+        if (/[0-9]/.test(val))         score++;
+        if (/[^a-zA-Z0-9]/.test(val))  score++;
+        var colors = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#10b981'];
+        var widths = ['20%', '40%', '60%', '80%', '100%'];
+        $('#strengthBar')
+            .css('width',      widths[score - 1]  || '0')
+            .css('background', colors[score - 1]  || '#eee');
+    });
+
+    // ── Avatar drop zone click → trigger file input ─────────────────
+    $('#dropZone').on('click', function () {
+        $('#avatarFileInput').trigger('click');
+    });
+
+    // ── Avatar file preview ─────────────────────────────────────────
+    $('#avatarFileInput').on('change', function () {
+        var file = this.files[0];
+        if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            $('#avatarPreviewImg').attr('src', e.target.result);
+            $('#avatarPreviewWrap').show();
+            $('#dropZone').hide();
+            $('#btnUpload').prop('disabled', false);
         };
-        reader.readAsDataURL(input.files[0]);
-    }
-}
+        reader.readAsDataURL(file);
+    });
 
-document.querySelector(".menuicn").addEventListener("click", () => {
-    document.querySelector(".navcontainer").classList.toggle("navclose");
+    // ── Hamburger menu toggle ───────────────────────────────────────
+    $('.menuicn').on('click', function () {
+        $('.navcontainer').toggleClass('navclose');
+    });
+
 });
 </script>
 </body>
