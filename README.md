@@ -119,9 +119,9 @@ $password = '';
 ## 🌿 Workflow Git
 
 |---|---|---|
-| `main` | Les deux | Version stable — demo finale |
-| `feature/hamza-auth-admin` | Hamza | Database, Login, logout, panel admin |
-| `feature/eya-user` | Eya | Catalogue, panier, commandes |
+| main | Les deux | Version stable — demo finale |
+| feature/hamza | Hamza | Login, logout, panel admin |
+| feature/eya | Eya | Catalogue, panier, commandes |
 ### Routine quotidienne
 ```bash
 git pull origin main          # récupérer les mises à jour
@@ -145,8 +145,8 @@ git commit -m "feat: description de ce que tu as fait"
 
 | Membre | Rôle | Branche |
 |---|---|---|
-| **Hamza Arfaoui** | Panel Admin | `feature/hamza-auth-admin` |
-| **Eya Kochbati** | Côté Utilisateur| `feature/eya-user` |
+| **Hamza Arfaoui** | Panel Admin & Database & Register , Login et logout | `feature/hamza` |
+| **Eya Kochbati** | Côté Utilisateur & panier & catalogue| `feature/eya` |
 
 ---
 
