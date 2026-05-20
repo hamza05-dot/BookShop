@@ -16,11 +16,10 @@
 ## 📋 Fonctionnalités
 
 ### 👤 Côté Utilisateur
-- Catalogue de livres avec recherche et filtres par catégorie
+- Catalogue de livres avec recherche 
 - Fiche détaillée de chaque livre
 - Panier d'achat (localStorage)
 - Inscription & connexion sécurisée
-- Espace compte & historique des commandes
 
 ### 🔐 Authentification
 - Connexion / Déconnexion sécurisée
@@ -29,47 +28,65 @@
 - Hash des mots de passe (bcrypt)
 
 ### ⚙️ Panel Admin
-- Dashboard avec statistiques et graphiques (Chart.js)
+- Dashboard avec statistiques 
 - CRUD complet des livres (+ upload image)
 - Gestion des catégories
 - Gestion des commandes (changement de statut)
 - Gestion des utilisateurs
-
+- Gestion des avis
 ---
 
 ## 📁 Structure du projet
 
 ```
-bookshop/
-├── index.php               # Accueil
-├── catalog.php             # Catalogue livres
-├── product.php             # Fiche livre
-├── login.php               # Connexion
-├── logout.php              # Déconnexion
-├── register.php            # Inscription
-├── cart.php                # Panier
-├── checkout.php            # Commande
-├── account.php             # Mon compte
+BookShop/
+├── Login.php                       # Connexion
+├── Logout.php                      # Déconnexion
+├── Register.php                    # Inscription
+├── index.php                       # Accueil boutique
+├── details.php                     # Fiche livre
+├── panier.php                      # Panier
+├── ajouter_panier.php              # Ajouter au panier (action)
+├── valider.php                     # Valider commande
+├── confirmation.php                # Confirmation commande
 │
 ├── admin/
-│   ├── dashboard.php       # Tableau de bord
-│   ├── books.php           # Gestion livres
-│   ├── categories.php      # Gestion catégories
-│   ├── orders.php          # Gestion commandes
-│   └── users.php          # Gestion utilisateurs
+│   ├── dashboard.php               # Tableau de bord
+│   ├── books.php                   # Liste des livres
+│   ├── add-book.php                # Ajouter un livre
+│   ├── book-detail.php             # Modifier un livre
+│   ├── authors.php                 # Liste des auteurs
+│   ├── author-detail.php           # Modifier un auteur
+│   ├── categories.php              # Gestion catégories
+│   ├── category-detail.php         # Détail catégorie
+│   ├── orders.php                  # Gestion commandes
+│   ├── commande_detail.php         # Détail commande
+│   ├── users.php                   # Gestion utilisateurs
+│   ├── review.php                  # Gestion avis
+│   └── profile.php                 # Profil admin
 │
 ├── includes/
-│   ├── db.php              # Connexion PDO
-│   └── auth.php            # Vérification session/rôle
+│   ├── db.php                      # Connexion PDO
+│   └── nav.php                     # Navigation admin (sidebar)
 │
-├── assets/
-│   ├── css/style.css
-│   └── js/main.js
+├── assests/
+│   ├── css/
+│   │   ├── admin.css               # Style interface admin
+│   │   ├── auth.css                # Style login / register
+│   │   ├── style.css               # Style boutique
+│   │   ├── style_details.css       # Style fiche livre
+│   │   ├── style_panier.css        # Style panier
+│   │   └── style_suivi.css         # Style suivi commande
+│   └── img/
+│       └── auth-bg.jpg             # Image fond login/register
 │
-├── uploads/                # Images livres & auteurs
+├── uploads/
+│   ├── book-covers/                # Couvertures des livres
+│   ├── authors/                    # Photos des auteurs
+│   └── users/                      # Photos de profil admins
 │
 └── sql/
-    └── database.sql        # Schéma de la base de données
+    └── bookdb.sql                  # Base de données complète
 ```
 
 ---
@@ -103,16 +120,14 @@ $password = '';
 
 |---|---|---|
 | `main` | Les deux | Version stable — demo finale |
-| `feature/hamza-auth-admin` | Hamza | Login, logout, panel admin |
+| `feature/hamza-auth-admin` | Hamza | Database, Login, logout, panel admin |
 | `feature/eya-user` | Eya | Catalogue, panier, commandes |
 ### Routine quotidienne
 ```bash
-git checkout feature/hamza-auth-admin
 git pull origin main          # récupérer les mises à jour
 # ... coder ...
 git add .
 git commit -m "feat: description de ce que tu as fait"
-git push origin feature/hamza-auth-admin
 ```
 
 ### Convention des commits
