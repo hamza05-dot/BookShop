@@ -16,9 +16,9 @@
 ## 📋 Fonctionnalités
 
 ### 👤 Côté Utilisateur
-- Catalogue de livres avec recherche 
+- Catalogue de livres avec recherche
 - Fiche détaillée de chaque livre
-- Panier d'achat (localStorage)
+- Panier d'achat
 - Inscription & connexion sécurisée
 
 ### 🔐 Authentification
@@ -28,12 +28,13 @@
 - Hash des mots de passe (bcrypt)
 
 ### ⚙️ Panel Admin
-- Dashboard avec statistiques 
+- Dashboard avec statistiques
 - CRUD complet des livres (+ upload image)
 - Gestion des catégories
 - Gestion des commandes (changement de statut)
 - Gestion des utilisateurs
 - Gestion des avis
+
 ---
 
 ## 📁 Structure du projet
@@ -95,33 +96,36 @@ BookShop/
 
 ### 1. Cloner le projet
 ```bash
-git clone https://github.com/hamza/bookshop.git
+git clone https://github.com/hamza05-dot/bookshop.git
 cd bookshop
 ```
 
 ### 2. Configurer la base de données
 ```bash
-# Importer le schéma SQL dans phpMyAdmin ou via terminal
-mysql -u root -p bookshop < sql/database.sql
+mysql -u root -p bookshop < sql/bookdb.sql
 ```
 
 Modifier le fichier `includes/db.php` :
+```php
 $host = 'localhost';
-$dbname = 'bookshop';
+$dbname = 'bookdb';
 $user = 'root';
 $password = '';
+```
 
-### 4. Lancer avec XAMPP / WAMP
+### 3. Lancer avec XAMPP / WAMP
 - Placer le projet dans `htdocs/` (XAMPP) ou `www/` (WAMP)
 
 ---
 
 ## 🌿 Workflow Git
 
+| Branche | Membre | Description |
 |---|---|---|
-| main | Les deux | Version stable — demo finale |
-| feature/hamza | Hamza | Login, logout, panel admin |
-| feature/eya | Eya | Catalogue, panier, commandes |
+| `main` | Les deux | Version stable — demo finale |
+| `feature/hamza` | Hamza | Login, logout, panel admin |
+| `feature/eya` | Eya | Catalogue, panier, commandes |
+
 ### Routine quotidienne
 ```bash
 git pull origin main          # récupérer les mises à jour
@@ -145,16 +149,5 @@ git commit -m "feat: description de ce que tu as fait"
 
 | Membre | Rôle | Branche |
 |---|---|---|
-| **Hamza Arfaoui** | Panel Admin & Database & Register , Login et logout | `feature/hamza` |
-| **Eya Kochbati** | Côté Utilisateur & panier & catalogue| `feature/eya` |
-
----
-
-## 📄 Licence
-
-Projet académique — TIC-1 · 2025
-| Branche | Responsable | Contenu |
-- Accéder via : `http://localhost/BookShop`
-```
-```php
-
+| **Hamza Arfaoui** | Panel Admin & Database & Register, Login et Logout | `feature/hamza` |
+| **Eya Kochbati** | Côté Utilisateur & Panier & Catalogue | `feature/eya` |
