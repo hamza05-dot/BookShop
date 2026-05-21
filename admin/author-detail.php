@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!empty($_FILES['image']['name'])) {
         $ext     = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
         $nomFich = time() . '_author_' . uniqid() . '.' . $ext;
-        move_uploaded_file($_FILES['image']['tmp_name'], '../uploads/author/' . $nomFich);
+        move_uploaded_file($_FILES['image']['tmp_name'], '../uploads/authors/' . $nomFich);
         $image = $nomFich;
     }
     $pdo->prepare("UPDATE auteur SET nom=?, prenom=?, description=?, status=?, dateNaiss=?, image=? WHERE idAuteur=?")
@@ -31,16 +31,18 @@ $stmt->execute([$id]);
 $author = $stmt->fetch();
 if (!$author) { header('Location: authors.php'); exit(); }
 
-$books = $pdo->query("
+$books = $pdo->prepare("
     SELECT l.*, GROUP_CONCAT(DISTINCT c.nomCat SEPARATOR ', ') AS categories
     FROM livre l
     INNER JOIN livre_auteur la ON l.idLivre = la.idLivre
     LEFT JOIN livre_categorie lc ON l.idLivre = lc.idLivre
     LEFT JOIN categorie c ON lc.idCat = c.idCat
-    WHERE la.idAuteur = $id
+    WHERE la.idAuteur = ?
     GROUP BY l.idLivre
     ORDER BY l.createdAt DESC
-")->fetchAll();
+");
+$books->execute([$id]);
+$books = $books->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -49,7 +51,6 @@ $books = $pdo->query("
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($author['prenom'].' '.$author['nom']) ?> — Author</title>
     <link rel="stylesheet" href="../assests/css/admin.css">
-    <!-- jQuery CDN -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <style>
         .author-profile { display:flex; gap:25px; align-items:flex-start; margin-bottom:25px; padding-bottom:20px; border-bottom:1px solid #eee; }
@@ -78,7 +79,8 @@ $books = $pdo->query("
             <?php endif; ?>
             <div class="author-info">
                 <h2><?= htmlspecialchars($author['prenom'].' '.$author['nom']) ?></h2>
-                <p><?= $author['status'] === 'vivant' ? '🟢 Alive' : '⚫ Deceased' ?></p>
+                <!-- FIX: was 'ALive' (typo) -->
+                <p><?= $author['status'] === 'Alive' ? '🟢 Alive' : '⚫ Deceased' ?></p>
                 <p>🗓 Born: <?= $author['dateNaiss'] ? date('d/m/Y', strtotime($author['dateNaiss'])) : '—' ?></p>
                 <p>📚 <?= count($books) ?> book<?= count($books) != 1 ? 's' : '' ?> in the catalog</p>
                 <?php if ($author['description']): ?>
@@ -98,15 +100,15 @@ $books = $pdo->query("
                 <div class="form-group">
                     <label>Status</label>
                     <select name="status">
-                        <option value="vivant" <?= $author['status']==='vivant'?'selected':'' ?>>🟢 Alive</option>
-                        <option value="decede" <?= $author['status']==='decede'?'selected':'' ?>>⚫ Deceased</option>
+                        <!-- FIX: values were 'vivant'/'decede', now match DB values 'Alive'/'Dead' -->
+                        <option value="Alive" <?= $author['status'] === 'Alive' ? 'selected' : '' ?>>🟢 Alive</option>
+                        <option value="Dead"  <?= $author['status'] === 'Dead'  ? 'selected' : '' ?>>⚫ Deceased</option>
                     </select>
                 </div>
             </div>
             <div class="form-group"><label>Biography</label><textarea name="description"><?= htmlspecialchars($author['description'] ?? '') ?></textarea></div>
             <div class="form-group">
                 <label>Photo</label>
-                <!-- input file — onchange removed, handled by jQuery below -->
                 <label class="file-label" for="photoInput">
                     <input type="file" id="photoInput" name="image" accept="image/*">
                     🧑 Choose a new photo…
@@ -139,25 +141,21 @@ $books = $pdo->query("
         </table>
     </div>
 </div>
-</div>
 <script>
 $(document).ready(function () {
-    // toggle sidebar
     $(".menuicn").on("click", function () {
         $(".navcontainer").toggleClass("navclose");
     });
-
-    // preview photo before upload
     $("#photoInput").on("change", function () {
         const file = this.files[0];
         if (!file) return;
         const reader = new FileReader();
         reader.onload = function (e) {
-            // show preview image
             $("#photoPreview").attr("src", e.target.result).show();
         };
         reader.readAsDataURL(file);
     });
 });
 </script>
-</body></html>
+</body>
+</html>

@@ -96,7 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['addBook'])) {
                 $aNom    = trim($_POST['a_nom']         ?? '');
                 $aPrenom = trim($_POST['a_prenom']      ?? '');
                 $aDesc   = trim($_POST['a_description'] ?? '');
-                $aStatus = trim($_POST['a_status']      ?? 'vivant');
+                $aStatus = trim($_POST['a_status']      ?? 'Alive');
                 $aDate   = $_POST['a_dateNaiss'] ?: null;
 
                 // Gérer la photo de l'auteur
@@ -487,8 +487,8 @@ foreach ($auteurs as $a) {
                                     <option value="<?= $a['idAuteur'] ?>">
                                         <?= htmlspecialchars($a['prenom'] . ' ' . $a['nom']) ?>
                                         <?php
-                                        // CORRECTION : on compare avec 'decede' (cohérent avec la BDD)
-                                        echo $a['status'] === 'decede' ? ' — ⚫ Décédé' : ' — 🟢 Vivant';
+                                        // FIX: compare with actual DB values 'Alive' / 'Dead'
+                                        echo $a['status'] === 'Dead' ? ' — ⚫ Deceased' : ' — 🟢 Alive';
                                         ?>
                                     </option>
                                 <?php endforeach; ?>
@@ -518,8 +518,9 @@ foreach ($auteurs as $a) {
                             <div class="form-group">
                                 <label>Statut</label>
                                 <select name="a_status" id="fieldAuteurStatus">
-                                    <option value="vivant">🟢 Vivant</option>
-                                    <option value="decede">⚫ Décédé</option>
+                                    <!-- FIX: values match DB ENUM 'Alive' / 'Dead' -->
+                                    <option value="Alive">🟢 Alive</option>
+                                    <option value="Dead">⚫ Deceased</option>
                                 </select>
                             </div>
                         </div>
@@ -858,8 +859,8 @@ $(document).ready(function () {
                     if (res.author.birthDate) {
                         $("#fieldAuteurDate").val(res.author.birthDate);
                     }
-                    // CORRECTION : status = 'decede' ou 'vivant' (cohérent avec la BDD)
-                    $("#fieldAuteurStatus").val(res.author.status || 'vivant');
+                    // FIX: default fallback uses 'Alive' to match DB ENUM
+                    $("#fieldAuteurStatus").val(res.author.status === 'Dead' ? 'Dead' : 'Alive');
 
                     if (res.author.photoFile) {
                         $("#apiAuthorFile").val(res.author.photoFile);

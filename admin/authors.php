@@ -34,10 +34,10 @@ $authors = $pdo->query("
         .avatar-ph { width:42px; height:42px; border-radius:50%; background:#dde; display:inline-flex; align-items:center; justify-content:center; font-size:20px; }
         .clickable-name { color:var(--secondary); cursor:pointer; font-weight:600; text-decoration:underline; }
         .status-badge { padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600; }
-        .status-vivant { background:#d5f5e3; color:#1e8449; }
-        .status-decede { background:#eee; color:#888; }
+        /* FIX: classes now match DB values 'Alive' and 'Dead' */
+        .status-Alive { background:#d5f5e3; color:#1e8449; }
+        .status-Dead  { background:#eee;    color:#888;    }
 
-        /* Same search style as books page */
         .search-wrap { display:flex; align-items:center; background:#f5f7fa; border:1.5px solid #e0e4ed; border-radius:25px; padding:6px 14px; gap:8px; }
         .search-wrap:focus-within { border-color:var(--secondary); background:#fff; }
         #authorSearch { border:none; background:transparent; outline:none; font-size:13px; font-family:"Poppins",sans-serif; width:220px; }
@@ -64,7 +64,12 @@ $authors = $pdo->query("
             <tr class="author-row" data-search="<?= strtolower(htmlspecialchars($a['prenom'].' '.$a['nom'].' '.($a['status'] ?? ''))) ?>">
                 <td><?= $a['image'] ? '<img class="author-avatar" src="../uploads/authors/'.htmlspecialchars($a['image']).'">' : '<span class="avatar-ph">✍️</span>' ?></td>
                 <td><a class="clickable-name" href="author-detail.php?id=<?= $a['idAuteur'] ?>"><?= htmlspecialchars($a['prenom'].' '.$a['nom']) ?></a></td>
-                <td><span class="status-badge status-<?= $a['status'] ?>"><?= $a['status'] === 'Alive' ? '🟢 Alive' : '⚫ Deceased' ?></span></td>
+                <td>
+                    <!-- FIX: class now uses actual status value e.g. status-Alive / status-Dead -->
+                    <span class="status-badge status-<?= htmlspecialchars($a['status']) ?>">
+                        <?= $a['status'] === 'Alive' ? '🟢 Alive' : '⚫ Deceased' ?>
+                    </span>
+                </td>
                 <td style="font-size:13px;"><?= $a['dateNaiss'] ? date('d/m/Y', strtotime($a['dateNaiss'])) : '—' ?></td>
                 <td><a href="author-detail.php?id=<?= $a['idAuteur'] ?>" style="font-weight:700; color:var(--secondary);"><?= $a['bookCount'] ?> book<?= $a['bookCount'] != 1 ? 's' : '' ?></a></td>
                 <td>
@@ -78,24 +83,18 @@ $authors = $pdo->query("
         </table>
     </div>
 </div>
-</div>
 <script>
 $(document).ready(function () {
-    // Live search — same logic as books page
     $("#authorSearch").on("input", function () {
         var q = $(this).val().toLowerCase();
         var visible = 0;
-
         $(".author-row").each(function () {
             var match = !q || $(this).data("search").includes(q);
             $(this).toggle(match);
             if (match) visible++;
         });
-
         $("#authorCount").text(visible);
     });
-
-    // Toggle sidebar
     $(".menuicn").on("click", function () {
         $(".navcontainer").toggleClass("navclose");
     });
