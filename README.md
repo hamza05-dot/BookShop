@@ -16,11 +16,10 @@
 ## 📋 Fonctionnalités
 
 ### 👤 Côté Utilisateur
-- Catalogue de livres avec recherche et filtres par catégorie
+- Catalogue de livres avec recherche
 - Fiche détaillée de chaque livre
-- Panier d'achat (localStorage)
+- Panier d'achat
 - Inscription & connexion sécurisée
-- Espace compte & historique des commandes
 
 ### 🔐 Authentification
 - Connexion / Déconnexion sécurisée
@@ -29,47 +28,66 @@
 - Hash des mots de passe (bcrypt)
 
 ### ⚙️ Panel Admin
-- Dashboard avec statistiques et graphiques (Chart.js)
+- Dashboard avec statistiques
 - CRUD complet des livres (+ upload image)
 - Gestion des catégories
 - Gestion des commandes (changement de statut)
 - Gestion des utilisateurs
+- Gestion des avis
 
 ---
 
 ## 📁 Structure du projet
 
 ```
-bookshop/
-├── index.php               # Accueil
-├── catalog.php             # Catalogue livres
-├── product.php             # Fiche livre
-├── login.php               # Connexion
-├── logout.php              # Déconnexion
-├── register.php            # Inscription
-├── cart.php                # Panier
-├── checkout.php            # Commande
-├── account.php             # Mon compte
+BookShop/
+├── Login.php                       # Connexion
+├── Logout.php                      # Déconnexion
+├── Register.php                    # Inscription
+├── index.php                       # Accueil boutique
+├── details.php                     # Fiche livre
+├── panier.php                      # Panier
+├── ajouter_panier.php              # Ajouter au panier (action)
+├── valider.php                     # Valider commande
+├── confirmation.php                # Confirmation commande
 │
 ├── admin/
-│   ├── dashboard.php       # Tableau de bord
-│   ├── books.php           # Gestion livres
-│   ├── categories.php      # Gestion catégories
-│   ├── orders.php          # Gestion commandes
-│   └── users.php          # Gestion utilisateurs
+│   ├── dashboard.php               # Tableau de bord
+│   ├── books.php                   # Liste des livres
+│   ├── add-book.php                # Ajouter un livre
+│   ├── book-detail.php             # Modifier un livre
+│   ├── authors.php                 # Liste des auteurs
+│   ├── author-detail.php           # Modifier un auteur
+│   ├── categories.php              # Gestion catégories
+│   ├── category-detail.php         # Détail catégorie
+│   ├── orders.php                  # Gestion commandes
+│   ├── commande_detail.php         # Détail commande
+│   ├── users.php                   # Gestion utilisateurs
+│   ├── review.php                  # Gestion avis
+│   └── profile.php                 # Profil admin
 │
 ├── includes/
-│   ├── db.php              # Connexion PDO
-│   └── auth.php            # Vérification session/rôle
+│   ├── db.php                      # Connexion PDO
+│   └── nav.php                     # Navigation admin (sidebar)
 │
-├── assets/
-│   ├── css/style.css
-│   └── js/main.js
+├── assests/
+│   ├── css/
+│   │   ├── admin.css               # Style interface admin
+│   │   ├── auth.css                # Style login / register
+│   │   ├── style.css               # Style boutique
+│   │   ├── style_details.css       # Style fiche livre
+│   │   ├── style_panier.css        # Style panier
+│   │   └── style_suivi.css         # Style suivi commande
+│   └── img/
+│       └── auth-bg.jpg             # Image fond login/register
 │
-├── uploads/                # Images livres & auteurs
+├── uploads/
+│   ├── book-covers/                # Couvertures des livres
+│   ├── authors/                    # Photos des auteurs
+│   └── users/                      # Photos de profil admins
 │
 └── sql/
-    └── database.sql        # Schéma de la base de données
+    └── bookdb.sql                  # Base de données complète
 ```
 
 ---
@@ -78,41 +96,42 @@ bookshop/
 
 ### 1. Cloner le projet
 ```bash
-git clone https://github.com/hamza/bookshop.git
+git clone https://github.com/hamza05-dot/bookshop.git
 cd bookshop
 ```
 
 ### 2. Configurer la base de données
 ```bash
-# Importer le schéma SQL dans phpMyAdmin ou via terminal
-mysql -u root -p bookshop < sql/database.sql
+mysql -u root -p bookshop < sql/bookdb.sql
 ```
 
 Modifier le fichier `includes/db.php` :
+```php
 $host = 'localhost';
-$dbname = 'bookshop';
+$dbname = 'bookdb';
 $user = 'root';
 $password = '';
+```
 
-### 4. Lancer avec XAMPP / WAMP
+### 3. Lancer avec XAMPP / WAMP
 - Placer le projet dans `htdocs/` (XAMPP) ou `www/` (WAMP)
 
 ---
 
 ## 🌿 Workflow Git
 
+| Branche | Membre | Description |
 |---|---|---|
 | `main` | Les deux | Version stable — demo finale |
-| `feature/hamza-auth-admin` | Hamza | Login, logout, panel admin |
-| `feature/eya-user` | Eya | Catalogue, panier, commandes |
+| `feature/hamza` | Hamza | Login, logout, panel admin |
+| `feature/eya` | Eya | Catalogue, panier, commandes |
+
 ### Routine quotidienne
 ```bash
-git checkout feature/hamza-auth-admin
 git pull origin main          # récupérer les mises à jour
 # ... coder ...
 git add .
 git commit -m "feat: description de ce que tu as fait"
-git push origin feature/hamza-auth-admin
 ```
 
 ### Convention des commits
@@ -130,16 +149,5 @@ git push origin feature/hamza-auth-admin
 
 | Membre | Rôle | Branche |
 |---|---|---|
-| **Hamza Arfaoui** | Panel Admin | `feature/hamza-auth-admin` |
-| **Eya Kochbati** | Côté Utilisateur| `feature/eya-user` |
-
----
-
-## 📄 Licence
-
-Projet académique — TIC-1 · 2025
-| Branche | Responsable | Contenu |
-- Accéder via : `http://localhost/BookShop`
-```
-```php
-
+| **Hamza Arfaoui** | Panel Admin & Database & Register, Login et Logout | `feature/hamza` |
+| **Eya Kochbati** | Côté Utilisateur & Panier & Catalogue | `feature/eya` |
