@@ -28,7 +28,6 @@ $authors = $pdo->query("
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Authors — BookShop Admin</title>
     <link rel="stylesheet" href="../assests/css/admin.css">
-    <!-- jQuery CDN -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <style>
         .author-avatar { width:42px; height:42px; border-radius:50%; object-fit:cover; }
@@ -37,6 +36,11 @@ $authors = $pdo->query("
         .status-badge { padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600; }
         .status-vivant { background:#d5f5e3; color:#1e8449; }
         .status-decede { background:#eee; color:#888; }
+
+        /* Same search style as books page */
+        .search-wrap { display:flex; align-items:center; background:#f5f7fa; border:1.5px solid #e0e4ed; border-radius:25px; padding:6px 14px; gap:8px; }
+        .search-wrap:focus-within { border-color:var(--secondary); background:#fff; }
+        #authorSearch { border:none; background:transparent; outline:none; font-size:13px; font-family:"Poppins",sans-serif; width:220px; }
     </style>
 </head>
 <body>
@@ -44,12 +48,20 @@ $authors = $pdo->query("
 <div class="main">
     <?php if ($message): ?><div class="message-box success">✓ <?= $message ?></div><?php endif; ?>
     <div class="report-container">
-        <div class="report-header"><h2>✍️ Authors (<?= count($authors) ?>)</h2></div>
+        <div class="report-header">
+            <h2>✍️ Authors (<span id="authorCount"><?= count($authors) ?></span>)</h2>
+            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                <div class="search-wrap">
+                    <span>🔍</span>
+                    <input type="text" id="authorSearch" placeholder="Search name, status…">
+                </div>
+            </div>
+        </div>
         <table>
             <thead><tr><th>Photo</th><th>Name</th><th>Status</th><th>Date of Birth</th><th>Books</th><th>Actions</th></tr></thead>
             <tbody>
             <?php foreach ($authors as $a): ?>
-            <tr>
+            <tr class="author-row" data-search="<?= strtolower(htmlspecialchars($a['prenom'].' '.$a['nom'].' '.($a['status'] ?? ''))) ?>">
                 <td><?= $a['image'] ? '<img class="author-avatar" src="../uploads/authors/'.htmlspecialchars($a['image']).'">' : '<span class="avatar-ph">✍️</span>' ?></td>
                 <td><a class="clickable-name" href="author-detail.php?id=<?= $a['idAuteur'] ?>"><?= htmlspecialchars($a['prenom'].' '.$a['nom']) ?></a></td>
                 <td><span class="status-badge status-<?= $a['status'] ?>"><?= $a['status'] === 'Alive' ? '🟢 Alive' : '⚫ Deceased' ?></span></td>
@@ -69,10 +81,25 @@ $authors = $pdo->query("
 </div>
 <script>
 $(document).ready(function () {
-    // toggle sidebar
+    // Live search — same logic as books page
+    $("#authorSearch").on("input", function () {
+        var q = $(this).val().toLowerCase();
+        var visible = 0;
+
+        $(".author-row").each(function () {
+            var match = !q || $(this).data("search").includes(q);
+            $(this).toggle(match);
+            if (match) visible++;
+        });
+
+        $("#authorCount").text(visible);
+    });
+
+    // Toggle sidebar
     $(".menuicn").on("click", function () {
         $(".navcontainer").toggleClass("navclose");
     });
 });
 </script>
-</body></html>
+</body>
+</html>
