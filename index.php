@@ -2,13 +2,18 @@
 session_start();
 require_once 'includes/db.php';
 
-// ✅ Noms corrects selon login.php
 $isLoggedIn = isset($_SESSION['idUser']);
 $username   = $_SESSION['nomUser'] ?? "Invité";
 
-// Récupération livres
-$query = $pdo->query("SELECT * FROM livre");
-$books = $query->fetchAll(PDO::FETCH_ASSOC);
+$search = trim($_GET['q'] ?? '');
+
+if ($search !== '') {
+    $stmt = $pdo->prepare("SELECT * FROM livre WHERE titre LIKE ?");
+    $stmt->execute(['%' . $search . '%']);
+    $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} else {
+    $books = $pdo->query("SELECT * FROM livre")->fetchAll(PDO::FETCH_ASSOC);
+}
 ?>
 
 <!DOCTYPE html>
@@ -30,8 +35,9 @@ $books = $query->fetchAll(PDO::FETCH_ASSOC);
         </div>
 
         <div class="nav-center">
-            <form action="recherche.php" method="GET" class="search-form">
-                <input type="text" name="q" placeholder="Entrez le nom du livre..." required>
+            <form action="index.php" method="GET" class="search-form">
+                <input type="text" name="q" placeholder="Entrez le nom du livre..."
+                       value="<?php echo htmlspecialchars($search); ?>">
                 <button type="submit"><i class="fas fa-search"></i></button>
             </form>
         </div>
@@ -77,6 +83,18 @@ $books = $query->fetchAll(PDO::FETCH_ASSOC);
     <p>Cliquez sur une couverture pour voir les détails du livre.</p>
 </header>
 
+<?php if ($search !== ''): ?>
+    <p style="text-align:center; margin:10px 0; color:#666;">
+        <?php if (count($books) > 0): ?>
+            <?php echo count($books); ?> résultat(s) pour "<strong><?php echo htmlspecialchars($search); ?></strong>"
+            — <a href="index.php">Voir tous les livres</a>
+        <?php else: ?>
+            Aucun livre trouvé pour "<strong><?php echo htmlspecialchars($search); ?></strong>"
+            — <a href="index.php">Voir tous les livres</a>
+        <?php endif; ?>
+    </p>
+<?php endif; ?>
+
 <div id="resultats">
 
 <?php foreach ($books as $book): ?>
@@ -99,6 +117,7 @@ $books = $query->fetchAll(PDO::FETCH_ASSOC);
             <form action="<?php echo $isLoggedIn ? 'ajouter_panier.php' : '#'; ?>" method="POST">
 
                 <input type="hidden" name="idLivre" value="<?php echo $book['idLivre']; ?>">
+                <input type="hidden" name="scroll" value="">
 
                 <div class="qty-container">
                     <button type="button" onclick="updateQty(this, -1)">-</button>
@@ -142,6 +161,20 @@ function showLoginAlert() {
     if (confirm("Vous devez vous connecter pour ajouter au panier. Aller à la page de connexion ?")) {
         window.location.href = "login.php";
     }
+}
+
+// ✅ Save scroll position before submit
+document.querySelectorAll('form[action="ajouter_panier.php"]').forEach(form => {
+    form.addEventListener('submit', function() {
+        this.querySelector('input[name="scroll"]').value = window.scrollY;
+    });
+});
+
+// ✅ Restore scroll position after redirect
+const params = new URLSearchParams(window.location.search);
+const scroll = params.get('_scroll');
+if (scroll) {
+    window.scrollTo(0, parseInt(scroll));
 }
 </script>
 

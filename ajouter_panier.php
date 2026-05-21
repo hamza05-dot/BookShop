@@ -6,10 +6,12 @@ if (!isset($_SESSION['idUser'])) {
     exit();
 }
 
-if (isset($_POST['idLivre'], $_POST['quantite'])) {
-    $id = $_POST['idLivre'];
-    $qte = (int)$_POST['quantite'];
+if (isset($_POST['idLivre'])) {
+    $id  = $_POST['idLivre'];
+    $qte = (int)($_POST['quantite'] ?? 1);
+
     if (!isset($_SESSION['panier'])) $_SESSION['panier'] = [];
+
     if (isset($_SESSION['panier'][$id])) {
         $_SESSION['panier'][$id] += $qte;
     } else {
@@ -17,8 +19,11 @@ if (isset($_POST['idLivre'], $_POST['quantite'])) {
     }
 }
 
-// ✅ Go back to where the user came from
+// ✅ Redirect back with scroll position preserved
 $referer = $_SERVER['HTTP_REFERER'] ?? 'index.php';
-header("Location: " . $referer);
+$scroll  = isset($_POST['scroll']) ? (int)$_POST['scroll'] : 0;
+
+$separator = strpos($referer, '?') !== false ? '&' : '?';
+header("Location: " . $referer . $separator . "_scroll=" . $scroll);
 exit();
 ?>

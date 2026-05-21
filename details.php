@@ -23,7 +23,6 @@ if (!$book) {
     die("Livre introuvable.");
 }
 
-// ✅ Vérifier si le client a acheté ce livre
 $aAchete    = false;
 $idLigneCom = null;
 
@@ -32,7 +31,9 @@ if ($isLoggedIn) {
         SELECT lc.idLigneCom
         FROM ligne_commande lc
         INNER JOIN commande c ON lc.idCom = c.idCom
-        WHERE c.idClient = ? AND lc.idLivre = ?
+        WHERE c.idClient = ? 
+        AND lc.idLivre = ?
+        AND c.status = 'confirmee'
         LIMIT 1
     ");
     $stmtCheck->execute([$_SESSION['idUser'], $idLivre]);
@@ -44,7 +45,6 @@ if ($isLoggedIn) {
     }
 }
 
-// ✅ Enregistrement avis — seulement si acheté
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_avis'])) {
 
     if (!$isLoggedIn) {
@@ -69,8 +69,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_avis'])) {
     exit();
 }
 
-// ✅ Récupération des avis
-$stmtAvis   = $pdo->prepare("SELECT * FROM avis WHERE idLigneCom = ? ORDER BY createdAt DESC");
+$stmtAvis = $pdo->prepare("
+    SELECT av.*
+    FROM avis av
+    INNER JOIN ligne_commande lc ON av.idLigneCom = lc.idLigneCom
+    WHERE lc.idLivre = ?
+    ORDER BY av.createdAt DESC
+");
 $stmtAvis->execute([$idLivre]);
 $avis_list  = $stmtAvis->fetchAll(PDO::FETCH_ASSOC);
 $count_avis = count($avis_list);
@@ -99,8 +104,10 @@ $count_avis = count($avis_list);
             <h1><?php echo htmlspecialchars($book['titre']); ?></h1>
             <div class="price"><?php echo number_format($book['prix'], 3); ?> DT</div>
             <p><?php echo nl2br(htmlspecialchars($book['description'])); ?></p>
+            <!-- ✅ FIXED — added quantite hidden field -->
             <form action="ajouter_panier.php" method="POST">
                 <input type="hidden" name="idLivre" value="<?php echo $book['idLivre']; ?>">
+                <input type="hidden" name="quantite" value="1">
                 <button type="submit" class="btn" style="background:#27ae60; color:white; padding:10px 20px; border:none; border-radius:5px; cursor:pointer;">
                     Ajouter au panier
                 </button>
@@ -119,7 +126,6 @@ $count_avis = count($avis_list);
         <p style="margin-top:15px; color:#666;"><?php echo nl2br(htmlspecialchars($book['desc_auteur'])); ?></p>
     </div>
 
-    <!-- ✅ Formulaire avis — conditionnel -->
     <div id="avis" style="margin-top:40px; background:white; padding:20px; border-radius:15px;">
         <h2>Donnez votre avis</h2>
 
@@ -153,11 +159,11 @@ $count_avis = count($avis_list);
     <div id="avis-list" style="margin-top:40px; padding-bottom:50px;">
         <h3>Avis des lecteurs (<?php echo $count_avis; ?>)</h3>
         <hr>
-        <?php if($count_avis > 0): ?>
-            <?php foreach($avis_list as $a): ?>
+        <?php if ($count_avis > 0): ?>
+            <?php foreach ($avis_list as $a): ?>
                 <div style="background:white; padding:15px; border-radius:10px; margin-bottom:15px; box-shadow:0 2px 5px rgba(0,0,0,0.05);">
                     <div style="color:#f1c40f;">
-                        <?php for($i=1; $i<=5; $i++) echo ($i <= $a['note']) ? '⭐' : '☆'; ?>
+                        <?php for ($i = 1; $i <= 5; $i++) echo ($i <= $a['note']) ? '⭐' : '☆'; ?>
                     </div>
                     <p style="margin:10px 0;">"<?php echo htmlspecialchars($a['commentaire']); ?>"</p>
                     <small style="color:#999;">Le <?php echo date('d/m/Y', strtotime($a['createdAt'])); ?></small>
