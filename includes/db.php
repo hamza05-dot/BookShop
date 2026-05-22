@@ -1,13 +1,21 @@
 <?php
-$host = 'localhost';
-$dbname = 'bookdb';
-$user = 'root';
-$password = '';
+class Database {
+    private static ?PDO $instance = null;
 
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $user, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    die("Erreur connexion : " . $e->getMessage());
+    private function __construct() {}
+
+    public static function getInstance(): PDO {
+        if (self::$instance === null) {
+            self::$instance = new PDO(
+                "mysql:host=localhost;dbname=bookdb;charset=utf8",
+                "root",
+                ""
+            );
+            self::$instance->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        }
+        return self::$instance;
+    }
 }
-?>
+
+// Backward compatibility - ancien code utilise $pdo directement
+$pdo = Database::getInstance();

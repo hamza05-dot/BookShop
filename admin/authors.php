@@ -1,104 +1,12 @@
 <?php
 session_start();
 require_once '../includes/db.php';
-if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') { header('Location: ../login.php'); exit(); }
+require_once 'models/AuthorModel.php';
+require_once 'controllers/AuthorController.php';
 
-$activePage = 'authors';
-$message = '';
-
-if (isset($_GET['delete'])) {
-    $id = (int)$_GET['delete'];
-    $pdo->prepare("DELETE FROM livre_auteur WHERE idAuteur=?")->execute([$id]);
-    $pdo->prepare("DELETE FROM auteur WHERE idAuteur=?")->execute([$id]);
-    $message = "Author deleted.";
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+    header('Location: ../login.php'); exit();
 }
 
-$authors = $pdo->query("
-    SELECT a.*, COUNT(la.idLivre) AS bookCount
-    FROM auteur a
-    LEFT JOIN livre_auteur la ON a.idAuteur = la.idAuteur
-    GROUP BY a.idAuteur
-    ORDER BY a.nom ASC
-")->fetchAll();
-?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Authors — BookShop Admin</title>
-    <link rel="stylesheet" href="../assests/css/admin.css">
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <style>
-        .author-avatar { width:42px; height:42px; border-radius:50%; object-fit:cover; }
-        .avatar-ph { width:42px; height:42px; border-radius:50%; background:#dde; display:inline-flex; align-items:center; justify-content:center; font-size:20px; }
-        .clickable-name { color:var(--secondary); cursor:pointer; font-weight:600; text-decoration:underline; }
-        .status-badge { padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600; }
-        /* FIX: classes now match DB values 'Alive' and 'Dead' */
-        .status-Alive { background:#d5f5e3; color:#1e8449; }
-        .status-Dead  { background:#eee;    color:#888;    }
-
-        .search-wrap { display:flex; align-items:center; background:#f5f7fa; border:1.5px solid #e0e4ed; border-radius:25px; padding:6px 14px; gap:8px; }
-        .search-wrap:focus-within { border-color:var(--secondary); background:#fff; }
-        #authorSearch { border:none; background:transparent; outline:none; font-size:13px; font-family:"Poppins",sans-serif; width:220px; }
-    </style>
-</head>
-<body>
-<?php include '../includes/nav.php'; ?>
-<div class="main">
-    <?php if ($message): ?><div class="message-box success">✓ <?= $message ?></div><?php endif; ?>
-    <div class="report-container">
-        <div class="report-header">
-            <h2>✍️ Authors (<span id="authorCount"><?= count($authors) ?></span>)</h2>
-            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                <div class="search-wrap">
-                    <span>🔍</span>
-                    <input type="text" id="authorSearch" placeholder="Search name, status…">
-                </div>
-            </div>
-        </div>
-        <table>
-            <thead><tr><th>Photo</th><th>Name</th><th>Status</th><th>Date of Birth</th><th>Books</th><th>Actions</th></tr></thead>
-            <tbody>
-            <?php foreach ($authors as $a): ?>
-            <tr class="author-row" data-search="<?= strtolower(htmlspecialchars($a['prenom'].' '.$a['nom'].' '.($a['status'] ?? ''))) ?>">
-                <td><?= $a['image'] ? '<img class="author-avatar" src="../uploads/authors/'.htmlspecialchars($a['image']).'">' : '<span class="avatar-ph">✍️</span>' ?></td>
-                <td><a class="clickable-name" href="author-detail.php?id=<?= $a['idAuteur'] ?>"><?= htmlspecialchars($a['prenom'].' '.$a['nom']) ?></a></td>
-                <td>
-                    <!-- FIX: class now uses actual status value e.g. status-Alive / status-Dead -->
-                    <span class="status-badge status-<?= htmlspecialchars($a['status']) ?>">
-                        <?= $a['status'] === 'Alive' ? '🟢 Alive' : '⚫ Deceased' ?>
-                    </span>
-                </td>
-                <td style="font-size:13px;"><?= $a['dateNaiss'] ? date('d/m/Y', strtotime($a['dateNaiss'])) : '—' ?></td>
-                <td><a href="author-detail.php?id=<?= $a['idAuteur'] ?>" style="font-weight:700; color:var(--secondary);"><?= $a['bookCount'] ?> book<?= $a['bookCount'] != 1 ? 's' : '' ?></a></td>
-                <td>
-                    <a class="btn btn-warning" href="author-detail.php?id=<?= $a['idAuteur'] ?>">View</a>
-                    <a class="btn btn-danger" href="?delete=<?= $a['idAuteur'] ?>" onclick="return confirm('Delete this author?')">Delete</a>
-                </td>
-            </tr>
-            <?php endforeach; ?>
-            <?php if (empty($authors)): ?><tr><td colspan="6" style="text-align:center;padding:40px;color:#bbb;">No authors yet.</td></tr><?php endif; ?>
-            </tbody>
-        </table>
-    </div>
-</div>
-<script>
-$(document).ready(function () {
-    $("#authorSearch").on("input", function () {
-        var q = $(this).val().toLowerCase();
-        var visible = 0;
-        $(".author-row").each(function () {
-            var match = !q || $(this).data("search").includes(q);
-            $(this).toggle(match);
-            if (match) visible++;
-        });
-        $("#authorCount").text(visible);
-    });
-    $(".menuicn").on("click", function () {
-        $(".navcontainer").toggleClass("navclose");
-    });
-});
-</script>
-</body>
-</html>
+$controller = new AuthorController();
+$controller->index();
