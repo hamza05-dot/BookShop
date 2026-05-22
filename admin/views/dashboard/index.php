@@ -122,7 +122,7 @@ $(document).ready(function () {
     });
 
     // ── 1. Cartes stats ───────────────────────────────────────────────────────
-    $.getJSON("../admin/api.php?action=dashboard_stats", function (data) {
+    $.getJSON("api.php?action=dashboard_stats", function (data) {
 
         var html = `
             <a href="books.php" class="box-link">
@@ -157,7 +157,7 @@ $(document).ready(function () {
     });
 
     // ── 2. Données des graphiques ─────────────────────────────────────────────
-    $.getJSON("../admin/api.php?action=dashboard_charts", function (data) {
+    $.getJSON("api.php?action=dashboard_charts", function (data) {
 
         // on affiche la grille seulement une fois les données prêtes
         $("#chartsGrid").show();
@@ -252,7 +252,7 @@ $(document).ready(function () {
     });
 
     // ── 3. Dernières commandes ────────────────────────────────────────────────
-    $.getJSON("../admin/api.php?action=dashboard_orders", function (rows) {
+    $.getJSON("api.php?action=dashboard_orders", function (rows) {
 
         if (!rows.length) {
             $("#recentOrdersWrap").html('<p style="padding:20px;text-align:center;color:#aaa;">No orders yet.</p>');

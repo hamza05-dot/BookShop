@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Commande #<?= $idCom ?> — BookShop Admin</title>
     <link rel="stylesheet" href="../assests/css/admin.css">
-    <!-- jQuery CDN -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <style>
         /* ── Layout ── */
@@ -40,7 +39,6 @@
             color: var(--primary);
             margin: 0;
         }
-        .card-body { padding: 22px; }
 
         /* ── Client Card ── */
         .client-hero {
@@ -65,24 +63,17 @@
             font-size: 32px;
             margin-bottom: 12px;
         }
-        .client-name { font-size: 17px; font-weight: 700; color: #1a202c; margin-bottom: 3px; }
+        .client-name  { font-size: 17px; font-weight: 700; color: #1a202c; margin-bottom: 3px; }
         .client-email { font-size: 13px; color: #718096; }
         .client-info-list { padding: 18px 22px; display: flex; flex-direction: column; gap: 14px; }
-        .info-row { display: flex; align-items: center; gap: 12px; }
-        .info-icon { width: 32px; height: 32px; border-radius: 8px; background: #f0f4ff; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+        .info-row   { display: flex; align-items: center; gap: 12px; }
+        .info-icon  { width: 32px; height: 32px; border-radius: 8px; background: #f0f4ff; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
         .info-label { font-size: 11px; color: #a0aec0; text-transform: uppercase; font-weight: 600; letter-spacing: .5px; }
         .info-value { font-size: 14px; color: #2d3748; font-weight: 500; }
 
         /* ── Order Meta ── */
-        .meta-row {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 0;
-        }
-        .meta-cell {
-            padding: 18px 20px;
-            border-right: 1px solid #f0f2f8;
-        }
+        .meta-row { display: grid; grid-template-columns: repeat(3, 1fr); }
+        .meta-cell { padding: 18px 20px; border-right: 1px solid #f0f2f8; }
         .meta-cell:last-child { border-right: none; }
         .meta-cell label { font-size: 11px; color: #a0aec0; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px; }
         .meta-cell p { font-size: 14px; color: #2d3748; font-weight: 600; margin: 0; }
@@ -101,7 +92,7 @@
             padding: 12px 16px; text-align: left;
         }
         .items-table td { padding: 14px 16px; border-top: 1px solid #f0f2f8; vertical-align: middle; }
-        .book-row { display: flex; align-items: center; gap: 12px; }
+        .book-row   { display: flex; align-items: center; gap: 12px; }
         .book-cover {
             width: 42px; height: 58px; object-fit: cover;
             border-radius: 4px; border: 1px solid #e2e8f0; flex-shrink: 0;
@@ -113,8 +104,8 @@
             flex-shrink: 0;
         }
         .book-title { font-size: 13px; font-weight: 600; color: #2d3748; line-height: 1.4; max-width: 280px; }
-        .amount { font-weight: 700; color: #2d3748; }
-        .subtotal { color: var(--primary); font-weight: 700; }
+        .amount     { font-weight: 700; color: #2d3748; }
+        .subtotal   { color: var(--primary); font-weight: 700; }
 
         /* ── Total Row ── */
         .total-bar {
@@ -122,16 +113,14 @@
             padding: 16px 22px; border-top: 2px solid #e8ecf4;
             gap: 12px;
         }
-        .total-label { font-size: 14px; color: #718096; font-weight: 600; }
+        .total-label  { font-size: 14px; color: #718096; font-weight: 600; }
         .total-amount { font-size: 22px; font-weight: 800; color: var(--primary); }
 
         /* ── Status Update ── */
-        .status-form {
-            display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
-        }
+        .status-form { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
         .status-form select {
             padding: 9px 14px; border: 1.5px solid #e2e8f0; border-radius: 10px;
-            font-size: 13px; font-family: "Poppins", sans-serif; background: #fff; cursor: pointer;
+            font-size: 13px; font-family: inherit; background: #fff; cursor: pointer;
         }
 
         .back-btn {
@@ -142,16 +131,18 @@
         }
         .back-btn:hover { background: #dce5ff; }
 
-        /* ── Page header ── */
         .page-header {
             display: flex; align-items: center; justify-content: space-between;
             margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
         }
-        .page-title { font-size: 22px; font-weight: 700; color: var(--primary); margin: 0; }
+        .page-title    { font-size: 22px; font-weight: 700; color: var(--primary); margin: 0; }
         .order-id-badge {
             font-size: 13px; color: #718096; background: #f7f9fc;
             border: 1px solid #e2e8f0; padding: 4px 12px; border-radius: 20px;
         }
+
+        /* toast de confirmation */
+        .toast { position:fixed; bottom:20px; right:20px; background:#333; color:#fff; padding:10px 18px; border-radius:8px; font-size:13px; z-index:999; display:none; }
     </style>
 </head>
 <body>
@@ -159,30 +150,28 @@
 
 <div class="main">
 
-    <?php if ($message): ?>
-        <div class="message-box success">✓ <?= htmlspecialchars($message) ?></div>
-    <?php endif; ?>
-
     <div class="page-header">
-        <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
             <a href="orders.php" class="back-btn">← Retour</a>
             <h2 class="page-title">Détails de la commande</h2>
             <span class="order-id-badge">#<?= $idCom ?></span>
         </div>
-        <form method="POST" class="status-form">
-            <select name="status">
+
+        <!-- Formulaire de changement de statut — soumis via fetch, pas PHP -->
+        <div class="status-form">
+            <select id="statusSelect">
                 <option value="en attente" <?= $order['status']==='en attente'?'selected':'' ?>>⏳ En attente</option>
                 <option value="confirmee"  <?= $order['status']==='confirmee' ?'selected':'' ?>>✅ Confirmée</option>
                 <option value="livree"     <?= $order['status']==='livree'    ?'selected':'' ?>>📦 Livrée</option>
                 <option value="annulee"    <?= $order['status']==='annulee'   ?'selected':'' ?>>❌ Annulée</option>
             </select>
-            <button class="btn btn-warning" name="updateStatus">Mettre à jour</button>
-        </form>
+            <button class="btn btn-warning" id="btnUpdateStatus">Mettre à jour</button>
+        </div>
     </div>
 
     <div class="detail-grid">
 
-        <!-- LEFT: Client Card -->
+        <!-- LEFT: Infos client -->
         <div class="card">
             <div class="client-hero">
                 <?php if ($order['userImage']): ?>
@@ -234,10 +223,10 @@
             </div>
         </div>
 
-        <!-- RIGHT: Order Details -->
-        <div style="display:flex; flex-direction:column; gap:20px;">
+        <!-- RIGHT: Détails commande -->
+        <div style="display:flex;flex-direction:column;gap:20px;">
 
-            <!-- Order Meta -->
+            <!-- Méta commande : date, statut, nb articles -->
             <div class="card">
                 <div class="meta-row">
                     <div class="meta-cell">
@@ -246,7 +235,8 @@
                     </div>
                     <div class="meta-cell">
                         <label>Statut</label>
-                        <p>
+                        <!-- Le badge de statut est mis à jour dynamiquement par jQuery -->
+                        <p id="statusBadge">
                             <span class="status-pill"
                                   style="background:<?= $currentStatus['bg'] ?>;color:<?= $currentStatus['color'] ?>">
                                 <span class="status-dot" style="background:<?= $currentStatus['color'] ?>"></span>
@@ -261,7 +251,7 @@
                 </div>
             </div>
 
-            <!-- Items -->
+            <!-- Liste des articles -->
             <div class="card">
                 <div class="card-header">
                     <span>📚</span>
@@ -314,12 +304,55 @@
     </div>
 </div>
 
+<div class="toast" id="toast"></div>
+
 <script>
 $(document).ready(function () {
-    // ── Sidebar toggle ──
+
     $(".menuicn").on("click", function () {
         $(".navcontainer").toggleClass("navclose");
     });
+
+    function showToast(msg) {
+        $("#toast").text(msg).fadeIn(200).delay(2200).fadeOut(400);
+    }
+
+    // couleurs des badges selon le statut
+    var statusStyles = {
+        'en attente': { bg: '#fff7e6', color: '#d97706', label: 'En attente' },
+        'confirmee':  { bg: '#ecfdf5', color: '#059669', label: 'Confirmée'  },
+        'livree':     { bg: '#eff6ff', color: '#2563eb', label: 'Livrée'     },
+        'annulee':    { bg: '#fff1f2', color: '#e11d48', label: 'Annulée'    }
+    };
+
+    // ── Mettre à jour le statut via fetch POST ────────────────────────────────
+    $("#btnUpdateStatus").on("click", function () {
+        var newStatus = $("#statusSelect").val();
+
+        $.post("../../api.php?action=order_update_status", {
+            idCom:  <?= $idCom ?>,
+            status: newStatus
+        }, function (res) {
+
+            if (res.success) {
+                // mettre à jour le badge de statut sans recharger la page
+                var s = statusStyles[newStatus] || { bg: '#f0f0f0', color: '#666', label: newStatus };
+                $("#statusBadge").html(
+                    '<span class="status-pill" style="background:'+s.bg+';color:'+s.color+'">' +
+                    '<span class="status-dot" style="background:'+s.color+'"></span>' +
+                    s.label +
+                    '</span>'
+                );
+                showToast("✅ Statut mis à jour : " + s.label);
+            } else {
+                showToast("❌ " + (res.error || "Échec de la mise à jour."));
+            }
+
+        }, "json").fail(function () {
+            showToast("❌ Erreur serveur.");
+        });
+    });
+
 });
 </script>
 </body>
