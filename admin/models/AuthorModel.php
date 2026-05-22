@@ -24,9 +24,15 @@ class AuthorModel {
 
     public function findBooksByAuthor(int $id): array {
         $stmt = $this->pdo->prepare("
-            SELECT l.* FROM livre l
-            INNER JOIN livre_auteur la ON l.idLivre = la.idLivre
+            SELECT l.*,
+                   GROUP_CONCAT(DISTINCT c.nomCat SEPARATOR ', ') AS categories
+            FROM livre l
+            INNER JOIN livre_auteur la    ON l.idLivre = la.idLivre
+            LEFT  JOIN livre_categorie lc ON l.idLivre = lc.idLivre
+            LEFT  JOIN categorie c        ON lc.idCat  = c.idCat
             WHERE la.idAuteur = ?
+            GROUP BY l.idLivre
+            ORDER BY l.titre ASC
         ");
         $stmt->execute([$id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -34,13 +40,25 @@ class AuthorModel {
 
     public function update(int $id, array $data): void {
         $this->pdo->prepare("
-            UPDATE auteur SET nom=?, prenom=?, description=?, status=?, dateNaiss=?, image=?
-            WHERE idAuteur=?
-        ")->execute([$data['nom'], $data['prenom'], $data['description'], $data['status'], $data['dateNaiss'], $data['image'], $id]);
+            UPDATE auteur
+            SET nom=?, prenom=?, description=?, status=?, dateNaiss=?, image=?
+            WHERE idAuteur = ?
+        ")->execute([
+            $data['nom'], $data['prenom'], $data['description'],
+            $data['status'], $data['dateNaiss'], $data['image'], $id,
+        ]);
     }
 
+    // Suppression atomique
     public function delete(int $id): void {
-        $this->pdo->prepare("DELETE FROM livre_auteur WHERE idAuteur=?")->execute([$id]);
-        $this->pdo->prepare("DELETE FROM auteur WHERE idAuteur=?")->execute([$id]);
+        $this->pdo->beginTransaction();
+        try {
+            $this->pdo->prepare("DELETE FROM livre_auteur WHERE idAuteur = ?")->execute([$id]);
+            $this->pdo->prepare("DELETE FROM auteur        WHERE idAuteur = ?")->execute([$id]);
+            $this->pdo->commit();
+        } catch (Exception $e) {
+            $this->pdo->rollBack();
+            throw $e;
+        }
     }
 }

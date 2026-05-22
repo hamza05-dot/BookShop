@@ -7,8 +7,6 @@ class AuthorController {
     }
 
     public function index(): void {
-
-        // requête AJAX → retourner JSON
         if ($this->isAjax()) {
             header('Content-Type: application/json');
             $action = $_GET['action'] ?? '';
@@ -16,20 +14,23 @@ class AuthorController {
             switch ($action) {
 
                 case 'authors':
-                    // liste complète des auteurs
                     echo json_encode($this->model->findAll());
                     break;
 
                 case 'delete_author':
-                    // supprimer un auteur par son ID
                     $id = (int)($_POST['id'] ?? 0);
                     if (!$id) {
                         http_response_code(400);
                         echo json_encode(['error' => 'ID manquant']);
                         break;
                     }
-                    $this->model->delete($id);
-                    echo json_encode(['success' => true]);
+                    try {
+                        $this->model->delete($id);
+                        echo json_encode(['success' => true]);
+                    } catch (Exception $e) {
+                        http_response_code(500);
+                        echo json_encode(['error' => 'Erreur lors de la suppression']);
+                    }
                     break;
 
                 default:
@@ -39,8 +40,6 @@ class AuthorController {
             exit;
         }
 
-        // requête normale → charger la vue
-        $message    = '';
         $activePage = 'authors';
         require __DIR__ . '/../views/authors/index.php';
     }
@@ -51,7 +50,6 @@ class AuthorController {
 
         $message = '';
 
-        // sauvegarde de l'auteur (formulaire avec upload image)
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $image = $_POST['current_image'];
             if (!empty($_FILES['image']['name'])) {
@@ -68,7 +66,7 @@ class AuthorController {
                 'dateNaiss'   => $_POST['dateNaiss'] ?: null,
                 'image'       => $image,
             ]);
-            $message = "Author updated.";
+            $message = 'Auteur mis à jour avec succès.';
         }
 
         $author     = $this->model->findById($id);

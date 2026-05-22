@@ -7,8 +7,6 @@ class UserController {
     }
 
     public function index(): void {
-
-        // requête AJAX → retourner JSON
         if ($this->isAjax()) {
             header('Content-Type: application/json');
             $action = $_GET['action'] ?? '';
@@ -16,7 +14,6 @@ class UserController {
             switch ($action) {
 
                 case 'users':
-                    // liste des admins et des clients
                     echo json_encode([
                         'admins'  => $this->model->findAdmins(),
                         'clients' => $this->model->findClients(),
@@ -24,7 +21,6 @@ class UserController {
                     break;
 
                 case 'promote_admin':
-                    // promouvoir un client en admin
                     $id = (int)($_POST['idUser'] ?? 0);
                     if (!$id) {
                         http_response_code(400);
@@ -40,7 +36,6 @@ class UserController {
                     break;
 
                 case 'remove_admin':
-                    // retirer le rôle admin
                     $id = (int)($_POST['id'] ?? 0);
                     if (!$id) {
                         http_response_code(400);
@@ -56,7 +51,6 @@ class UserController {
                     break;
 
                 case 'delete_user':
-                    // supprimer un utilisateur
                     $id = (int)($_POST['id'] ?? 0);
                     if (!$id) {
                         http_response_code(400);
@@ -67,8 +61,13 @@ class UserController {
                         echo json_encode(['error' => 'Vous ne pouvez pas vous supprimer vous-même']);
                         break;
                     }
-                    $this->model->delete($id);
-                    echo json_encode(['success' => true]);
+                    try {
+                        $this->model->delete($id);
+                        echo json_encode(['success' => true]);
+                    } catch (Exception $e) {
+                        http_response_code(500);
+                        echo json_encode(['error' => 'Erreur lors de la suppression']);
+                    }
                     break;
 
                 default:
@@ -78,8 +77,6 @@ class UserController {
             exit;
         }
 
-        // requête normale → charger la vue
-        $message    = '';
         $activePage = 'users';
         require __DIR__ . '/../views/users/index.php';
     }

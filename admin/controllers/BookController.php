@@ -7,8 +7,6 @@ class BookController {
     }
 
     public function index(): void {
-
-        // requête AJAX → retourner JSON
         if ($this->isAjax()) {
             header('Content-Type: application/json');
             $action = $_GET['action'] ?? '';
@@ -16,20 +14,23 @@ class BookController {
             switch ($action) {
 
                 case 'books':
-                    // liste complète des livres
                     echo json_encode($this->model->findAll());
                     break;
 
                 case 'delete_book':
-                    // supprimer un livre par son ID
                     $id = (int)($_POST['id'] ?? 0);
                     if (!$id) {
                         http_response_code(400);
                         echo json_encode(['error' => 'ID manquant']);
                         break;
                     }
-                    $this->model->delete($id);
-                    echo json_encode(['success' => true]);
+                    try {
+                        $this->model->delete($id);
+                        echo json_encode(['success' => true]);
+                    } catch (Exception $e) {
+                        http_response_code(500);
+                        echo json_encode(['error' => 'Erreur lors de la suppression']);
+                    }
                     break;
 
                 default:
@@ -39,8 +40,6 @@ class BookController {
             exit;
         }
 
-        // requête normale → charger la vue
-        $message    = '';
         $activePage = 'books';
         require __DIR__ . '/../views/books/index.php';
     }
@@ -51,7 +50,6 @@ class BookController {
 
         $message = '';
 
-        // sauvegarde du livre (formulaire avec upload image)
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['saveBook'])) {
             $image = $_POST['current_image'];
             if (!empty($_FILES['image']['name'])) {
@@ -68,7 +66,7 @@ class BookController {
                 'image'       => $image,
             ]);
             $this->model->updateCategories($id, $_POST['categories'] ?? []);
-            $message = "Book updated.";
+            $message = 'Livre mis à jour avec succès.';
         }
 
         $livre         = $this->model->findById($id);

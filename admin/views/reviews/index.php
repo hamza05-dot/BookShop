@@ -60,7 +60,7 @@ $(document).ready(function () {
 
     // ── Charger les avis ──────────────────────────────────────────────────────
     function loadReviews() {
-        $.getJSON("api.php?action=reviews", function (data)  {
+        $.getJSON("reviews.php?action=reviews", function (data)  {
 
             var reviews = data.reviews;
 
