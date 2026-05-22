@@ -6,17 +6,21 @@ class UserModel {
         $this->pdo = Database::getInstance();
     }
 
+    // Liste de tous les admins
     public function findAdmins(): array {
         return $this->pdo->query("
-            SELECT u.* FROM utilisateur u
+            SELECT u.idUser, u.nomUser, u.prenomUser, u.email, u.image, u.createdAt
+            FROM utilisateur u
             INNER JOIN admin a ON u.idUser = a.idUser
             ORDER BY u.nomUser ASC
         ")->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    // Liste de tous les clients (non-admins)
     public function findClients(): array {
         return $this->pdo->query("
-            SELECT u.*, c.telephone, c.adresse, c.ville, c.dateNaiss
+            SELECT u.idUser, u.nomUser, u.prenomUser, u.email, u.image, u.createdAt,
+                   c.telephone, c.adresse, c.ville, c.dateNaiss
             FROM utilisateur u
             LEFT JOIN client c ON u.idUser = c.idUser
             WHERE u.idUser NOT IN (SELECT idUser FROM admin)
@@ -24,43 +28,30 @@ class UserModel {
         ")->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function promoteToAdmin(int $id): string {
-        $check = $this->pdo->prepare("SELECT * FROM admin WHERE idUser = ?");
-        $check->execute([$id]);
-        if ($check->fetch()) return "This user is already an admin.";
+    // Promouvoir un client en admin
+    public function promoteToAdmin(int $id): void {
         $this->pdo->prepare("INSERT INTO admin (idUser) VALUES (?)")->execute([$id]);
-        return "User promoted to admin.";
     }
 
+    // Vérifier si un utilisateur est déjà admin
+    public function isAdmin(int $id): bool {
+        $stmt = $this->pdo->prepare("SELECT idUser FROM admin WHERE idUser=?");
+        $stmt->execute([$id]);
+        return (bool)$stmt->fetch();
+    }
+
+    // Retirer le rôle admin
     public function removeAdmin(int $id): void {
         $this->pdo->prepare("DELETE FROM admin WHERE idUser=?")->execute([$id]);
     }
 
-public function delete(int $id): void {
-    // 1. Delete order items linked to this user's orders
-    $this->pdo->prepare("
-        DELETE FROM ligne_commande 
-        WHERE idCom IN (SELECT idCom FROM commande WHERE idClient = ?)
-    ")->execute([$id]);
-
-    // 2. Delete orders
-    $this->pdo->prepare("
-        DELETE FROM commande WHERE idClient = ?
-    ")->execute([$id]);
-
-    // 3. Delete from client table
-    $this->pdo->prepare("
-        DELETE FROM client WHERE idUser = ?
-    ")->execute([$id]);
-
-    // 4. Delete from admin table (if promoted)
-    $this->pdo->prepare("
-        DELETE FROM admin WHERE idUser = ?
-    ")->execute([$id]);
-
-    // 5. Finally delete the user
-    $this->pdo->prepare("
-        DELETE FROM utilisateur WHERE idUser = ?
-    ")->execute([$id]);
-}
+    // Supprimer un utilisateur et toutes ses données liées
+    public function delete(int $id): void {
+        // supprimer dans l'ordre pour respecter les clés étrangères
+        $this->pdo->prepare("DELETE FROM ligne_commande WHERE idCom IN (SELECT idCom FROM commande WHERE idClient=?)")->execute([$id]);
+        $this->pdo->prepare("DELETE FROM commande    WHERE idClient=?")->execute([$id]);
+        $this->pdo->prepare("DELETE FROM client      WHERE idUser=?")->execute([$id]);
+        $this->pdo->prepare("DELETE FROM admin       WHERE idUser=?")->execute([$id]);
+        $this->pdo->prepare("DELETE FROM utilisateur WHERE idUser=?")->execute([$id]);
+    }
 }

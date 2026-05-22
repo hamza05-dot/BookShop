@@ -55,7 +55,7 @@ $(document).ready(function () {
 
     // ── Charger les catégories ────────────────────────────────────────────────
     function loadCategories() {
-        $.getJSON("api.php?action=categories", function (cats) {
+        $.getJSON("categories.php?action=categories", function (cats) {
 
             $("#catCount").text(cats.length);
 
@@ -97,7 +97,7 @@ $(document).ready(function () {
         }
         $("#addCatError").hide();
 
-        $.post("api.php?action=add_category", { nomCat: nom }, function (res) {
+        $.post("categories.php?action=add_category", { nomCat: nom }, function (res) {
             if (res.success) {
                 $("#newCatName").val('');
                 showToast("✅ Category \"" + res.nomCat + "\" added.");
@@ -125,7 +125,7 @@ $(document).ready(function () {
 
         var $row = $(this).closest("tr");
 
-        $.post("api.php?action=delete_category", { id: id }, function (res) {
+        $.post("categories.php?action=delete_category", { id: id }, function (res) {
             if (res.success) {
                 $row.fadeOut(300, function () {
                     $(this).remove();

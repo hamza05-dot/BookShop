@@ -64,7 +64,7 @@ $(document).ready(function () {
         var search = $("#filterSearch").val().trim();
         var status = $("#filterStatus").val();
 
-        var url = "../admin/api.php?action=orders";
+        var url = "orders.php?action=orders";
         if (status) url += "&status=" + encodeURIComponent(status);
         if (search) url += "&search=" + encodeURIComponent(search);
 
@@ -120,7 +120,7 @@ $(document).ready(function () {
                 var status = $(".status-select[data-id='" + id + "']").val();
 
                 // on envoie un POST à l'API
-                $.post("../admin/api.php?action=order_update_status", { idCom: id, status: status }, function (res) {
+                $.post("orders.php?action=order_update_status", { idCom: id, status: status }, function (res) {
                     if (res.success) {
                         showToast("✅ Status updated!");
                         // on recharge le tableau pour refléter le changement

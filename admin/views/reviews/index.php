@@ -60,7 +60,7 @@ $(document).ready(function () {
 
     // ── Charger les avis ──────────────────────────────────────────────────────
     function loadReviews() {
-        $.getJSON("api.php?action=reviews", function (data) {
+        $.getJSON("api.php?action=reviews", function (data)  {
 
             var reviews = data.reviews;
 
@@ -136,7 +136,7 @@ $(document).ready(function () {
 
         var $row = $(this).closest("tr");
 
-        $.post("api.php?action=delete_review", { id: id }, function (res) {
+        $.post("reviews.php?action=delete_review", { id: id }, function (res) {
             if (res.success) {
                 $row.fadeOut(300, function () {
                     $(this).remove();

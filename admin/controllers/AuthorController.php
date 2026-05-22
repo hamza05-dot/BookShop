@@ -7,12 +7,40 @@ class AuthorController {
     }
 
     public function index(): void {
-        $message = '';
-        if (isset($_GET['delete'])) {
-            $this->model->delete((int)$_GET['delete']);
-            $message = "Author deleted.";
+
+        // requête AJAX → retourner JSON
+        if ($this->isAjax()) {
+            header('Content-Type: application/json');
+            $action = $_GET['action'] ?? '';
+
+            switch ($action) {
+
+                case 'authors':
+                    // liste complète des auteurs
+                    echo json_encode($this->model->findAll());
+                    break;
+
+                case 'delete_author':
+                    // supprimer un auteur par son ID
+                    $id = (int)($_POST['id'] ?? 0);
+                    if (!$id) {
+                        http_response_code(400);
+                        echo json_encode(['error' => 'ID manquant']);
+                        break;
+                    }
+                    $this->model->delete($id);
+                    echo json_encode(['success' => true]);
+                    break;
+
+                default:
+                    http_response_code(400);
+                    echo json_encode(['error' => 'Action inconnue']);
+            }
+            exit;
         }
-        $authors    = $this->model->findAll();
+
+        // requête normale → charger la vue
+        $message    = '';
         $activePage = 'authors';
         require __DIR__ . '/../views/authors/index.php';
     }
@@ -22,6 +50,8 @@ class AuthorController {
         if (!$id) { header('Location: authors.php'); exit(); }
 
         $message = '';
+
+        // sauvegarde de l'auteur (formulaire avec upload image)
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $image = $_POST['current_image'];
             if (!empty($_FILES['image']['name'])) {
@@ -45,5 +75,10 @@ class AuthorController {
         $books      = $this->model->findBooksByAuthor($id);
         $activePage = 'authors';
         require __DIR__ . '/../views/authors/detail.php';
+    }
+
+    private function isAjax(): bool {
+        return !empty($_SERVER['HTTP_X_REQUESTED_WITH'])
+            && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
     }
 }

@@ -52,7 +52,7 @@ $(document).ready(function () {
 
     // ── Charger les auteurs ───────────────────────────────────────────────────
     function loadAuthors() {
-        $.getJSON("api.php?action=authors", function (authors) {
+        $.getJSON("authors.php?action=authors", function (authors) {
 
             $("#authorCount").text(authors.length);
 
@@ -125,7 +125,7 @@ $(document).ready(function () {
 
         var $row = $(this).closest("tr");
 
-        $.post("api.php?action=delete_author", { id: id }, function (res) {
+        $.post("authors.php?action=delete_author", { id: id }, function (res) {
             if (res.success) {
                 $row.fadeOut(300, function () {
                     $(this).remove();

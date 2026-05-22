@@ -102,7 +102,7 @@ $(document).ready(function () {
 
     // ── Charger admins et clients ─────────────────────────────────────────────
     function loadUsers() {
-        $.getJSON("api.php?action=users", function (data) {
+        $.getJSON("users.php?action=users", function (data) {
 
             // ─ Tableau des admins ─────────────────────────────────────────────
             $("#adminCount").text(data.admins.length);
@@ -187,7 +187,7 @@ $(document).ready(function () {
         var idUser = $("#promoteSelect").val();
         if (!idUser) { showToast("⚠️ Please select a client first."); return; }
 
-        $.post("api.php?action=promote_admin", { idUser: idUser }, function (res) {
+        $.post("users.php?action=promote_admin", { idUser: idUser }, function (res) {
             if (res.success) {
                 showToast("✅ User promoted to admin.");
                 loadUsers(); // recharge les deux tableaux
@@ -206,7 +206,7 @@ $(document).ready(function () {
 
         if (!confirm('Remove admin role from "' + name + '"?')) return;
 
-        $.post("api.php?action=remove_admin", { id: id }, function (res) {
+        $.post("users.php?action=remove_admin", { id: id }, function (res) {
             if (res.success) {
                 showToast("✅ Admin role removed.");
                 loadUsers();
@@ -227,7 +227,7 @@ $(document).ready(function () {
 
         var $row = $(this).closest("tr");
 
-        $.post("api.php?action=delete_user", { id: id }, function (res) {
+        $.post("users.php?action=delete_user", { id: id }, function (res) {
             if (res.success) {
                 $row.fadeOut(300, function () {
                     $(this).remove();

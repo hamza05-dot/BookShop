@@ -54,7 +54,7 @@ $(document).ready(function () {
 
     // ── Charger la liste des livres ───────────────────────────────────────────
     function loadBooks() {
-        $.getJSON("api.php?action=books", function (books) {
+        $.getJSON("books.php?action=books", function (books) {
 
             $("#bookCount").text(books.length);
 
@@ -129,7 +129,7 @@ $(document).ready(function () {
 
         var $row = $(this).closest("tr");
 
-        $.post("api.php?action=delete_book", { id: id }, function (res) {
+        $.post("books.php?action=delete_book", { id: id }, function (res) {
             if (res.success) {
                 // on retire la ligne du tableau sans recharger la page
                 $row.fadeOut(300, function () {

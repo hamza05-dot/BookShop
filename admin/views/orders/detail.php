@@ -329,7 +329,7 @@ $(document).ready(function () {
     $("#btnUpdateStatus").on("click", function () {
         var newStatus = $("#statusSelect").val();
 
-        $.post("../../api.php?action=order_update_status", {
+        $.post("orders.php?action=order_update_status", {
             idCom:  <?= $idCom ?>,
             status: newStatus
         }, function (res) {
